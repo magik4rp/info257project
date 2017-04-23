@@ -74,8 +74,8 @@ def get_major(id):
 	cur = con.cursor()
 	
 	columnNames = ["ID", "Name", "Description", "Average Salary", "Expected Growth", "Number of Students", "Number of Offering Universities"]
-	limitCareers = 200
-	limitUniversities = 200
+	limitCareers = 6
+	limitUniversities = 6
 	
 	cur.execute("select * from majors where majorID = " + str(id))
 	majors = cur.fetchall()
@@ -95,7 +95,7 @@ def get_city(id):
 	cur = con.cursor()
 	
 	columnNames = ["ID", "State", "City", "Summer Temperature", "Winter Temperature"]
-	limitUniversities = 200
+	limitUniversities = 6
 	
 	cur.execute("select * from cities where cityID = " + str(id))
 	cities = cur.fetchall()
@@ -113,7 +113,7 @@ def get_university(id):
 	
 	columnNames = ["ID", "Name", "UG Admissions Rate", "Size", "In-State Tuition", "Out-State Tuition"]
 	columnNames_info = ["State", "City"]
-	limitMajors = 200
+	limitMajors = 6
 	
 	cur.execute("select * from universities where universityID = " + str(id))
 	universities = cur.fetchall()
@@ -133,7 +133,7 @@ def get_career(id):
 	cur = con.cursor()
 	
 	columnNames = ["ID", "Name", "Salary", "Growth", "Employment"]
-	limitMajors = 200
+	limitMajors = 6
 	
 	cur.execute("select * from careers where careerID = " + str(id))
 	careers = cur.fetchall()
@@ -148,7 +148,7 @@ def page_not_found(error):
     return render_template('page_not_found.html'), 404
 
 ##################################################################################
-Vetted Code Up Till This Point
+#Vetted Code Up Till This Point
 ##################################################################################
 	
 extra_dirs = ['static',]
