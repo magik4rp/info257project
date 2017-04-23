@@ -1,17 +1,15 @@
 
 """ Table Name: universities
-(0, 'index', 'INTEGER', 0, None, 0)
+(0, 'universityID', 'INTEGER', 0, None, 0)
 (1, 'name', 'TEXT', 0, None, 0)
 (2, 'ug_admissions_rate', 'TEXT', 0, None, 0)
 (3, 'size', 'TEXT', 0, None, 0)
 (4, 'in_state_tuition', 'TEXT', 0, None, 0)
 (5, 'out_state_tuition', 'TEXT', 0, None, 0)
-(6, 'state', 'TEXT', 0, None, 0)
-(7, 'city', 'TEXT', 0, None, 0)
-
+(6, 'cityID', 'INTEGER', 0, None, 0)
 
 Table Name: majors
-(0, 'index', 'INTEGER', 0, None, 0)
+(0, 'majorID', 'INTEGER', 0, None, 0)
 (1, 'name', 'TEXT', 0, None, 0)
 (2, 'description', 'TEXT', 0, None, 0)
 (3, 'average_salary', 'TEXT', 0, None, 0)
@@ -19,75 +17,140 @@ Table Name: majors
 (5, 'no_of_students', 'TEXT', 0, None, 0)
 (6, 'no_of_offering_schools', 'TEXT', 0, None, 0)
 
-
 Table Name: cities
-(0, 'index', 'INTEGER', 0, None, 0)
+(0, 'cityID', 'INTEGER', 0, None, 0)
 (1, 'state', 'TEXT', 0, None, 0)
 (2, 'city', 'TEXT', 0, None, 0)
 (3, 'summer_temperature', 'TEXT', 0, None, 0)
 (4, 'winter_temperature', 'TEXT', 0, None, 0)
 
-
 Table Name: careers
-(0, 'index', 'INTEGER', 0, None, 0)
+(0, 'careerID', 'INTEGER', 0, None, 0)
 (1, 'name', 'TEXT', 0, None, 0)
 (2, 'salary', 'TEXT', 0, None, 0)
 (3, 'growth', 'TEXT', 0, None, 0)
 (4, 'employment', 'TEXT', 0, None, 0)
 
-
 Table Name: majorcareers
-(0, 'index', 'INTEGER', 0, None, 0)
-(1, 'major', 'TEXT', 0, None, 0)
-(2, 'career', 'TEXT', 0, None, 0)
-
+(0, 'majorID', 'REAL', 0, None, 0)
+(1, 'careerID', 'INTEGER', 0, None, 0)
 
 Table Name: universitymajors
-(0, 'index', 'INTEGER', 0, None, 0)
-(1, 'university', 'TEXT', 0, None, 0)
-(2, 'major', 'TEXT', 0, None, 0)
-
+(0, 'universityID', 'REAL', 0, None, 0)
+(1, 'majorID', 'INTEGER', 0, None, 0)
 
 Table Name: applications
-(0, 'index', 'INTEGER', 0, None, 0)
-(1, 'university', 'TEXT', 0, None, 0)
-(2, 'major', 'TEXT', 0, None, 0)
-(3, 'degree', 'TEXT', 0, None, 0)
-(4, 'decision', 'TEXT', 0, None, 0)
-(5, 'decision_method', 'TEXT', 0, None, 0)
-(6, 'ug_gpa', 'REAL', 0, None, 0)
-(7, 'gre_verbal', 'REAL', 0, None, 0)
-(8, 'gre_quant', 'REAL', 0, None, 0)
-(9, 'gre_writing', 'REAL', 0, None, 0) """
+(0, 'universityID', 'REAL', 0, None, 0)
+(1, 'majorID', 'INTEGER', 0, None, 0)
+(2, 'degree', 'TEXT', 0, None, 0)
+(3, 'decision', 'TEXT', 0, None, 0)
+(4, 'decision_method', 'TEXT', 0, None, 0)
+(5, 'ug_gpa', 'REAL', 0, None, 0)
+(6, 'gre_verbal', 'REAL', 0, None, 0)
+(7, 'gre_quant', 'REAL', 0, None, 0)
+(8, 'gre_writing', 'REAL', 0, None, 0) """
+
 
 from flask import Flask
 from flask import render_template
-import os
+from flask import request
+from flask import redirect
+
 import sqlite3 as lite
 import sys
+import os
 from os import path
+
 app = Flask(__name__)
 
 @app.route('/')
 def home():
 	return render_template("home.html")
-# def home():
-#     return render_template("home.html")
 
 @app.route('/majors/<int:id>')
 def get_major(id):
+	
 	con = lite.connect("info257app.db")
 	cur = con.cursor()
-	cur.execute("select * from majors where name = 'Mathematics and Computer Science'")
-	rows = cur.fetchall()
-	column_names = ["ID", "Name", "Description", "Average Salary", "Expected Growth", "Number of Students", "Number of Offering Universities"]
-	print(rows)
+	
+	columnNames = ["ID", "Name", "Description", "Average Salary", "Expected Growth", "Number of Students", "Number of Offering Universities"]
+	limitCareers = 6
+	limitUniversities = 6
+	
+	cur.execute("select * from majors where majorID = " + str(id))
+	majors = cur.fetchall()
+	
+	cur.execute("select careers.name, careers.careerID from careers, majorcareers where majorID = " + str(id) + " and careers.careerID = majorcareers.careerID limit " + str(limitCareers))
+	careers = cur.fetchall()
+	
+	cur.execute("select universities.name, universities.universityID from universities, universitymajors where majorID = " + str(id) + " and universities.universityID = universitymajors.universityID limit " + str(limitUniversities))
+	universities = cur.fetchall()
+	
 	return render_template("major.html", **locals())
 
+@app.route('/cities/<int:id>')
+def get_city(id):
+	
+	con = lite.connect("info257app.db")
+	cur = con.cursor()
+	
+	columnNames = ["ID", "State", "City", "Summer Temperature", "Winter Temperature"]
+	limitUniversities = 6
+	
+	cur.execute("select * from cities where cityID = " + str(id))
+	cities = cur.fetchall()
+	
+	cur.execute("select universities.name, universities.universityID from universities where cityID = " + str(id) + " limit " + str(limitUniversities))
+	universities = cur.fetchall()
+	
+	return render_template("city.html", **locals())
+
+@app.route('/universities/<int:id>')
+def get_university(id):
+	
+	con = lite.connect("info257app.db")
+	cur = con.cursor()
+	
+	columnNames = ["ID", "Name", "UG Admissions Rate", "Size", "In-State Tuition", "Out-State Tuition"]
+	columnNames_info = ["State", "City"]
+	limitMajors = 6
+	
+	cur.execute("select * from universities where universityID = " + str(id))
+	universities = cur.fetchall()
+	
+	cur.execute("select state, city from universities, cities where universities.universityID = " + str(id) + " and cities.cityID = universities.cityID")
+	universities_info = cur.fetchall()
+	
+	cur.execute("select majors.name, majors.majorID from majors, universitymajors where universitymajors.universityID = " + str(id) + " and universitymajors.majorID = majors.majorID limit " + str(limitMajors))
+	majors = cur.fetchall()
+	
+	return render_template("university.html", **locals())
+	
+@app.route('/careers/<int:id>')
+def get_career(id):
+	
+	con = lite.connect("info257app.db")
+	cur = con.cursor()
+	
+	columnNames = ["ID", "Name", "Salary", "Growth", "Employment"]
+	limitMajors = 6
+	
+	cur.execute("select * from careers where careerID = " + str(id))
+	careers = cur.fetchall()
+	
+	cur.execute("select majors.name, majors.majorID from majors, majorcareers where majorcareers.careerID = " + str(id) + " and majorcareers.majorID = majors.majorID limit " + str(limitMajors))
+	majors = cur.fetchall()
+	
+	return render_template("career.html", **locals())
+	
 @app.errorhandler(404)
 def page_not_found(error):
     return render_template('page_not_found.html'), 404
 
+##################################################################################
+#Vetted Code Up Till This Point
+##################################################################################
+	
 extra_dirs = ['static',]
 extra_files = extra_dirs[:]
 for extra_dir in extra_dirs:
@@ -100,7 +163,6 @@ app.run(extra_files=extra_files)
 
 # applications
 
-from flask import Flask, render_template, request, redirect
 app = Flask(__name__)
 
 import sqlite3 as lite
@@ -202,7 +264,7 @@ if __name__ == "__main__":
 
 @app.route("/")
 def view_all_cities():
-	
+
 	con = lite.connect("cities.db")
 	cur = con.cursor()
 	cur.execute("select state, city, summer_temperature, winter_temperature")
@@ -229,14 +291,14 @@ def add_cities():
 		return redirect("/")
 
 
-@app.route("/cities/<int:id>")
+#@app.route("/cities/<int:id>")
 def get_cities(id):
 
 	con = lite.connect("cities.db")
 	cur = con.cursor()
 	cur.execute("select state, city, summer_temperature, winter_temperature from cities where id = " + str(id))
 	rows = cur.fetchall()
-
+	column_names = ["state", "city", "summer temperature", "winter temperature"]
 	return render_template("viewcities.html", **locals())
 
 # majorcareers
@@ -358,14 +420,14 @@ def add_universities():
 		return redirect("/")
 
 
-@app.route("/universities/<int:id>")
+#@app.route("/universities/<int:id>")
 def get_universities(id):
 
 	con = lite.connect("universities.db")
 	cur = con.cursor()
 	cur.execute("select name, ug_admissions_rate, size, in_state_tuition, out_state_tuition, state, city from universities where id = " + str(id))
 	rows = cur.fetchall()
-
+	column_names = ["name", "UG admissions rate", "size", "in state tuition", "out of state tuition", "state", "city"]
 	return render_template("viewuniversities.html", **locals())
 
 # universitymajors
