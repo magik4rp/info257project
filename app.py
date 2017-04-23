@@ -223,10 +223,9 @@ def add_cities():
 		winter_temperature = request.form["winter_temperature"]
 
 		con = lite.connect("cities.db")
-		with con:
+		if con:
 			cur = con.cursor()
-			cur.execute("insert into cities (state, city, summer_temperature, winter_temperature) values ('{}', '{}')".format(state, city, summer_temperature, winter_temperature)
-
+			cur.execute("insert into cities (state, city, summer_temperature, winter_temperature) values ('{}', '{}')").format(state, city, summer_temperature, winter_temperature)
 		return redirect("/")
 
 

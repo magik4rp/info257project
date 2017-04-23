@@ -29,9 +29,10 @@ a:hover {
 #navbar {
 	background: #48BCA5;
 	height: 70px;
-	position: fixed;
+	position: relative;
 	top: 0px;
 	width: 100%;
+	z-index: 2;
 }
 #navbar #name {
 	font-family: 'Nunito', sans-serif;
@@ -89,7 +90,7 @@ a:hover {
 }
 #content {
 	position: relative;
-	margin-top: 150px;
+	margin-top: 50px;
 	width: calc(60% - 80px);
 	background: white;
 	margin-left: auto;
