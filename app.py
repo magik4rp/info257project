@@ -399,9 +399,9 @@ def view_all_universities():
 	
 	con = lite.connect("universities.db")
 	cur = con.cursor()
-	cur.execute("select name, ug_admissions_rate, size, in_state_tuition, out_state_tuition, state, city from universities")
+	cur.execute("select name, ug_admissions_rate, size, in_state_tuition, out_state_tuition, cityID from universities")
 	rows = cur.fetchall()
-	column_names = ["name", "UG admissions rate", "size", "in state tuition", "out of state tuition", "state", "city"]
+	column_names = ["name", "UG admissions rate", "size", "in state tuition", "out of state tuition", "city"]
 	
 	return render_template("index.html", **locals())
 
@@ -417,8 +417,7 @@ def add_universities():
 		size = request.form["size"]
 		in_state_tuition = request.form["in_state_tuition"]
 		out_state_tuition = request.form["out_state_tuition"]
-		city = request.form["city"]
-		state = request.form["state"]
+		cityID = request.form["city"]
 
 		con = lite.connect("universities.db")
 		with con:
@@ -435,7 +434,7 @@ def get_universities(id):
 	cur = con.cursor()
 	cur.execute("select name, ug_admissions_rate, size, in_state_tuition, out_state_tuition, state, city from universities where id = " + str(id))
 	rows = cur.fetchall()
-	column_names = ["name", "UG admissions rate", "size", "in state tuition", "out of state tuition", "state", "city"]
+	column_names = ["name", "UG admissions rate", "size", "in state tuition", "out of state tuition", "city"]
 	return render_template("viewuniversities.html", **locals())
 
 # universitymajors
