@@ -175,7 +175,8 @@ def view_all_applications():
 	cur = con.cursor()
 	cur.execute("select university, major, degree, decision, decision_method, ug_gpa, gre_verbal, gre_quant, gre_writing from applications")
 	rows = cur.fetchall()
-
+	column_names = ["University","Major","Degree","Decision","Decision_Method","UG_GPA","GRE_Verbal","GRE_Quant","GRE_Writing"]
+	
 	return render_template("index.html", **locals())
 
 @app.route("/addapplications", methods=["GET", "POST"])
@@ -224,7 +225,8 @@ def view_all_careers():
 	cur = con.cursor()
 	cur.execute("select name, salary, growth, employment from careers")
 	rows = cur.fetchall()
-
+	column_names = ["Name","Salary","Growth","Employment"]
+	
 	return render_template("index.html", **locals())
 
 @app.route("/addcareers", methods=["GET", "POST"])
@@ -269,7 +271,8 @@ def view_all_cities():
 	cur = con.cursor()
 	cur.execute("select state, city, summer_temperature, winter_temperature")
 	rows = cur.fetchall()
-
+	column_names = ["state", "city", "summer temperature", "winter temperature"]
+	
 	return render_template("index.html", **locals())
 
 @app.route("/addcities", methods=["GET", "POST"])
@@ -394,7 +397,8 @@ def view_all_universities():
 	cur = con.cursor()
 	cur.execute("select name, ug_admissions_rate, size, in_state_tuition, out_state_tuition, state, city from universities")
 	rows = cur.fetchall()
-
+	column_names = ["name", "UG admissions rate", "size", "in state tuition", "out of state tuition", "state", "city"]
+	
 	return render_template("index.html", **locals())
 
 @app.route("/adduniversities", methods=["GET", "POST"])
