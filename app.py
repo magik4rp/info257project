@@ -62,6 +62,7 @@ import os
 from os import path
 
 app = Flask(__name__)
+resultsDict = []
 
 @app.route('/')
 def home():
@@ -142,6 +143,74 @@ def get_career(id):
 	majors = cur.fetchall()
 	
 	return render_template("career.html", **locals())
+
+@app.route('/search/<keyword>')
+def get_search(keyword):
+	
+	con = lite.connect("info257app.db")
+	cur = con.cursor()
+	
+	def cleanResult(results):
+		cleaned = []
+		for i in range(len(results)):
+			cleaned += [results[i][0]]
+		return cleaned
+	
+	cur.execute("select careerID from careers where name like '%" + keyword + "%'")
+	resultsCareers = cleanResult(cur.fetchall())
+	
+	cur.execute("select universityID from universities where name like '%" + keyword + "%'")
+	resultsUniversities = cleanResult(cur.fetchall())
+	
+	cur.execute("select cityID from cities where state like '%" + keyword + "%' or city like '%" + keyword + "%'")
+	resultsCities = cleanResult(cur.fetchall())
+	
+	cur.execute("select majorID from majors where name like '%" + keyword + "%'")
+	resultsMajors = cleanResult(cur.fetchall())
+	
+	global resultsDict
+	resultsDict = {"careers":resultsCareers, "universities":resultsUniversities, "cities":resultsCities, "majors":resultsMajors}
+
+	return "hellooooooo"
+	
+@app.route('/results/')
+def get_result():
+	
+	con = lite.connect("info257app.db")
+	cur = con.cursor()
+
+	displayDict = []
+	displayCareers = []
+	displayUniversities = []
+	displayCities = []
+	displayMajors = []
+	
+	labelsMajors = ["ID", "Name", "Description", "Average Salary", "Expected Growth", "Number of Students", "Number of Offering Universities"]
+	labelsCities = ["ID", "State", "City", "Summer Temperature", "Winter Temperature"]
+	labelsUniversities = ["ID", "Name", "UG Admissions Rate", "Size", "In-State Tuition", "Out-State Tuition", "City ID"]
+	labelsCareers = ["ID", "Name", "Salary", "Growth", "Employment"]
+
+	for i in range(len(resultsDict['careers'])):
+		cur.execute("select * from careers where careerID = " + str(resultsDict['careers'][i]))
+		displayCareers += cur.fetchall()
+	
+	for i in range(len(resultsDict['universities'])):
+		cur.execute("select * from universities where universityID = " + str(resultsDict['universities'][i]))
+		displayUniversities += cur.fetchall()
+		
+	for i in range(len(resultsDict['cities'])):
+		cur.execute("select * from cities where cityID = " + str(resultsDict['cities'][i]))
+		displayCities += cur.fetchall()
+		
+	for i in range(len(resultsDict['majors'])):
+		cur.execute("select * from majors where majorID = " + str(resultsDict['majors'][i]))
+		displayMajors += cur.fetchall()
+	
+	displayDict = {"careers":displayCareers, "universities":displayUniversities, "cities":displayCities, "majors":displayMajors}
+	print (displayDict)
+	
+	return "hallooooo"
+
 	
 @app.errorhandler(404)
 def page_not_found(error):
