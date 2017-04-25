@@ -313,6 +313,7 @@ def view_all_majorcareers():
 	cur = con.cursor()
 	cur.execute("select major, career from majorcareers")
 	rows = cur.fetchall()
+	column_names = ["Major", "Career"]
 
 	return render_template("index.html", **locals())
 
@@ -341,6 +342,7 @@ def get_majorcareers(id):
 	cur = con.cursor()
 	cur.execute("select id major, career from majorcareers where id = " + str(id))
 	rows = cur.fetchall()
+	column_names = ["Major", "Career"]
 
 	return render_template("viewmajorcareers.html", **locals())
                                     
@@ -353,6 +355,7 @@ def view_all_majors():
 	cur = con.cursor()
 	cur.execute("select name, description, average_salary, expected_growth, no_of_students, no_of_offering_schools from majors")
 	rows = cur.fetchall()
+	columnNames = ["ID", "Name", "Description", "Average Salary", "Expected Growth", "Number of Students", "Number of Offering Universities"]
 
 	return render_template("index.html", **locals())
 
@@ -385,6 +388,7 @@ def get_majors(id):
 	cur = con.cursor()
 	cur.execute("select id name, description, average_salary, expected_growth, no_of_students, no_of_offering_schools from majors where id = " + str(id))
 	rows = cur.fetchall()
+	columnNames = ["ID", "Name", "Description", "Average Salary", "Expected Growth", "Number of Students", "Number of Offering Universities"]
 
 	return render_template("viewmajors.html", **locals())
 
@@ -443,6 +447,7 @@ def view_all_universitymajors():
 	cur = con.cursor()
 	cur.execute("select university, major from universitymajors")
 	rows = cur.fetchall()
+	column_names = ["University", "Major"]
 
 	return render_template("index.html", **locals())
 
@@ -471,5 +476,6 @@ def get_universitymajors(id):
 	cur = con.cursor()
 	cur.execute("select id university, major from universitymajors where id = " + str(id))
 	rows = cur.fetchall()
+	column_names = ["University", "Major"]
 
 	return render_template("viewuniversitymajors.html", **locals())                                   
