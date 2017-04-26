@@ -62,6 +62,7 @@ import os
 from os import path
 
 app = Flask(__name__)
+resultsDict = []
 
 @app.route('/')
 def home():
@@ -142,6 +143,74 @@ def get_career(id):
 	majors = cur.fetchall()
 	
 	return render_template("career.html", **locals())
+
+@app.route('/search/<keyword>')
+def get_search(keyword):
+	
+	con = lite.connect("info257app.db")
+	cur = con.cursor()
+	
+	def cleanResult(results):
+		cleaned = []
+		for i in range(len(results)):
+			cleaned += [results[i][0]]
+		return cleaned
+	
+	cur.execute("select careerID from careers where name like '%" + keyword + "%'")
+	resultsCareers = cleanResult(cur.fetchall())
+	
+	cur.execute("select universityID from universities where name like '%" + keyword + "%'")
+	resultsUniversities = cleanResult(cur.fetchall())
+	
+	cur.execute("select cityID from cities where state like '%" + keyword + "%' or city like '%" + keyword + "%'")
+	resultsCities = cleanResult(cur.fetchall())
+	
+	cur.execute("select majorID from majors where name like '%" + keyword + "%'")
+	resultsMajors = cleanResult(cur.fetchall())
+	
+	global resultsDict
+	resultsDict = {"careers":resultsCareers, "universities":resultsUniversities, "cities":resultsCities, "majors":resultsMajors}
+
+	return "hellooooooo"
+	
+@app.route('/results/')
+def get_result():
+	
+	con = lite.connect("info257app.db")
+	cur = con.cursor()
+
+	displayDict = []
+	displayCareers = []
+	displayUniversities = []
+	displayCities = []
+	displayMajors = []
+	
+	labelsMajors = ["ID", "Name", "Description", "Average Salary", "Expected Growth", "Number of Students", "Number of Offering Universities"]
+	labelsCities = ["ID", "State", "City", "Summer Temperature", "Winter Temperature"]
+	labelsUniversities = ["ID", "Name", "UG Admissions Rate", "Size", "In-State Tuition", "Out-State Tuition", "City ID"]
+	labelsCareers = ["ID", "Name", "Salary", "Growth", "Employment"]
+
+	for i in range(len(resultsDict['careers'])):
+		cur.execute("select * from careers where careerID = " + str(resultsDict['careers'][i]))
+		displayCareers += cur.fetchall()
+	
+	for i in range(len(resultsDict['universities'])):
+		cur.execute("select * from universities where universityID = " + str(resultsDict['universities'][i]))
+		displayUniversities += cur.fetchall()
+		
+	for i in range(len(resultsDict['cities'])):
+		cur.execute("select * from cities where cityID = " + str(resultsDict['cities'][i]))
+		displayCities += cur.fetchall()
+		
+	for i in range(len(resultsDict['majors'])):
+		cur.execute("select * from majors where majorID = " + str(resultsDict['majors'][i]))
+		displayMajors += cur.fetchall()
+	
+	displayDict = {"careers":displayCareers, "universities":displayUniversities, "cities":displayCities, "majors":displayMajors}
+	print (displayDict)
+	
+	return "hallooooo"
+
 	
 @app.errorhandler(404)
 def page_not_found(error):
@@ -175,7 +244,8 @@ def view_all_applications():
 	cur = con.cursor()
 	cur.execute("select university, major, degree, decision, decision_method, ug_gpa, gre_verbal, gre_quant, gre_writing from applications")
 	rows = cur.fetchall()
-
+	column_names = ["University","Major","Degree","Decision","Decision_Method","UG_GPA","GRE_Verbal","GRE_Quant","GRE_Writing"]
+	
 	return render_template("index.html", **locals())
 
 @app.route("/addapplications", methods=["GET", "POST"])
@@ -224,7 +294,8 @@ def view_all_careers():
 	cur = con.cursor()
 	cur.execute("select name, salary, growth, employment from careers")
 	rows = cur.fetchall()
-
+	column_names = ["Name","Salary","Growth","Employment"]
+	
 	return render_template("index.html", **locals())
 
 @app.route("/addcareers", methods=["GET", "POST"])
@@ -269,7 +340,8 @@ def view_all_cities():
 	cur = con.cursor()
 	cur.execute("select state, city, summer_temperature, winter_temperature")
 	rows = cur.fetchall()
-
+	column_names = ["state", "city", "summer temperature", "winter temperature"]
+	
 	return render_template("index.html", **locals())
 
 @app.route("/addcities", methods=["GET", "POST"])
@@ -310,6 +382,7 @@ def view_all_majorcareers():
 	cur = con.cursor()
 	cur.execute("select major, career from majorcareers")
 	rows = cur.fetchall()
+	column_names = ["Major", "Career"]
 
 	return render_template("index.html", **locals())
 
@@ -338,6 +411,7 @@ def get_majorcareers(id):
 	cur = con.cursor()
 	cur.execute("select id major, career from majorcareers where id = " + str(id))
 	rows = cur.fetchall()
+	column_names = ["Major", "Career"]
 
 	return render_template("viewmajorcareers.html", **locals())
                                     
@@ -350,6 +424,7 @@ def view_all_majors():
 	cur = con.cursor()
 	cur.execute("select name, description, average_salary, expected_growth, no_of_students, no_of_offering_schools from majors")
 	rows = cur.fetchall()
+	columnNames = ["ID", "Name", "Description", "Average Salary", "Expected Growth", "Number of Students", "Number of Offering Universities"]
 
 	return render_template("index.html", **locals())
 
@@ -382,6 +457,7 @@ def get_majors(id):
 	cur = con.cursor()
 	cur.execute("select id name, description, average_salary, expected_growth, no_of_students, no_of_offering_schools from majors where id = " + str(id))
 	rows = cur.fetchall()
+	columnNames = ["ID", "Name", "Description", "Average Salary", "Expected Growth", "Number of Students", "Number of Offering Universities"]
 
 	return render_template("viewmajors.html", **locals())
 
@@ -392,9 +468,10 @@ def view_all_universities():
 	
 	con = lite.connect("universities.db")
 	cur = con.cursor()
-	cur.execute("select name, ug_admissions_rate, size, in_state_tuition, out_state_tuition, state, city from universities")
+	cur.execute("select name, ug_admissions_rate, size, in_state_tuition, out_state_tuition, cityID from universities")
 	rows = cur.fetchall()
-
+	column_names = ["name", "UG admissions rate", "size", "in state tuition", "out of state tuition", "city"]
+	
 	return render_template("index.html", **locals())
 
 @app.route("/adduniversities", methods=["GET", "POST"])
@@ -409,8 +486,7 @@ def add_universities():
 		size = request.form["size"]
 		in_state_tuition = request.form["in_state_tuition"]
 		out_state_tuition = request.form["out_state_tuition"]
-		city = request.form["city"]
-		state = request.form["state"]
+		cityID = request.form["city"]
 
 		con = lite.connect("universities.db")
 		with con:
@@ -427,7 +503,7 @@ def get_universities(id):
 	cur = con.cursor()
 	cur.execute("select name, ug_admissions_rate, size, in_state_tuition, out_state_tuition, state, city from universities where id = " + str(id))
 	rows = cur.fetchall()
-	column_names = ["name", "UG admissions rate", "size", "in state tuition", "out of state tuition", "state", "city"]
+	column_names = ["name", "UG admissions rate", "size", "in state tuition", "out of state tuition", "city"]
 	return render_template("viewuniversities.html", **locals())
 
 # universitymajors
@@ -439,6 +515,7 @@ def view_all_universitymajors():
 	cur = con.cursor()
 	cur.execute("select university, major from universitymajors")
 	rows = cur.fetchall()
+	column_names = ["University", "Major"]
 
 	return render_template("index.html", **locals())
 
@@ -467,5 +544,6 @@ def get_universitymajors(id):
 	cur = con.cursor()
 	cur.execute("select id university, major from universitymajors where id = " + str(id))
 	rows = cur.fetchall()
+	column_names = ["University", "Major"]
 
 	return render_template("viewuniversitymajors.html", **locals())                                   
