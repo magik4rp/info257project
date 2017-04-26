@@ -3,6 +3,9 @@
   <head>
     <link rel="stylesheet" href="{{ url_for('static', filename='stylesheets/entity_layout.css') }}">
     <link href="https://fonts.googleapis.com/css?family=Nunito:400,700,900" rel="stylesheet">
+    <link rel="icon" href="{{ url_for('static', filename='images/favicon.png') }}"  sizes="16x16">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.0/jquery.min.js"></script>
+    <script src="{{ url_for('static', filename='js/home.js') }}"></script>
     <title>GladCap</title>
   </head>
   <body>
@@ -10,11 +13,44 @@
       <a href="/" id="logo"><img src="{{ url_for('static', filename='images/gradhat.png') }}"></a>
       <div id="name">GladCap</div>
     </div>
-    <div id="content home"></div>
+    <div class="content" id="home">
+    	<div class="inner">
+<!--     		<h2>What are you searching for?</h2>
+    		<div class="button" id="university">Universities</div>
+    		<div class="button" id="major">Majors</div>
+    		<div class="button" id="job">Jobs</div> -->
+        <div class="forms">
+          <div class="form active" id="university">
+            <div class="tab">
+              Universities
+            </div>
+            <div class="form-content" id="university">
+              <form class="form-content-inner">
+                <h1>Universities</h1>
+                <input type="text" id="keyword" placeholder="Search by keyword...">
+                <input type="submit">
+              </form>
+            </div>
+          </div>
+          <div class="form" id="major">
+            <div class="tab">
+              Majors
+            </div>
+            <form class="form-content" id="major">
+            </form>
+          </div>
+          <div class="form" id="job">
+            <div class="tab">
+              Jobs
+            </div>
+            <form class="form-content" id="job">
+            </form>
+          </div>
+        </div>
+    	</div>
+    </div>
     <div id="footer">
-      {% block footer %}
       &copy; Copyright 2017 by <a href="http://domain.invalid/">you</a>.
-      {% endblock %}
     </div>
   </body>
 </html>
