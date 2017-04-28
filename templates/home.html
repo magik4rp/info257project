@@ -1,10 +1,45 @@
+<!-- Table Name: universities
+(0, 'universitiesID', 'INTEGER', 0, None, 0)
+(1, 'name', 'TEXT', 0, None, 0)
+(2, 'ug_admissions_rate', 'TEXT', 0, None, 0)
+(3, 'size', 'TEXT', 0, None, 0)
+(4, 'in_state_tuition', 'TEXT', 0, None, 0)
+(5, 'out_state_tuition', 'TEXT', 0, None, 0)
+(6, 'cityID', 'INTEGER', 0, None, 0)
+
+
+Table Name: majorss
+(0, 'majorsID', 'INTEGER', 0, None, 0)
+(1, 'name', 'TEXT', 0, None, 0)
+(2, 'description', 'TEXT', 0, None, 0)
+(3, 'average_salary', 'TEXT', 0, None, 0)
+(4, 'expected_growth', 'TEXT', 0, None, 0)
+(5, 'no_of_students', 'TEXT', 0, None, 0)
+(6, 'no_of_offering_schools', 'TEXT', 0, None, 0)
+
+Table Name: cities
+(0, 'cityID', 'INTEGER', 0, None, 0)
+(1, 'state', 'TEXT', 0, None, 0)
+(2, 'city', 'TEXT', 0, None, 0)
+(3, 'summer_temperature', 'TEXT', 0, None, 0)
+(4, 'winter_temperature', 'TEXT', 0, None, 0)
+
+Table Name: careerss
+(0, 'careersID', 'INTEGER', 0, None, 0)
+(1, 'name', 'TEXT', 0, None, 0)
+(2, 'salary', 'TEXT', 0, None, 0)
+(3, 'growth', 'TEXT', 0, None, 0)
+(4, 'employment', 'TEXT', 0, None, 0) -->
+
 <!doctype html>
 <html>
   <head>
+    <link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
     <link rel="stylesheet" href="{{ url_for('static', filename='stylesheets/entity_layout.css') }}">
     <link href="https://fonts.googleapis.com/css?family=Nunito:400,700,900" rel="stylesheet">
     <link rel="icon" href="{{ url_for('static', filename='images/favicon.png') }}"  sizes="16x16">
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.0/jquery.min.js"></script>
+    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
     <script src="{{ url_for('static', filename='js/home.js') }}"></script>
     <title>GladCap</title>
   </head>
@@ -16,35 +51,109 @@
     <div class="content" id="home">
     	<div class="inner">
 <!--     		<h2>What are you searching for?</h2>
-    		<div class="button" id="university">Universities</div>
-    		<div class="button" id="major">Majors</div>
+    		<div class="button" id="universities">Universities</div>
+    		<div class="button" id="majors">Majorss</div>
     		<div class="button" id="job">Jobs</div> -->
         <div class="forms">
-          <div class="form active" id="university">
+          <div class="form active" id="universities">
             <div class="tab">
               Universities
             </div>
-            <div class="form-content" id="university">
-              <form class="form-content-inner">
+            <div class="form-content" id="universities">
+              <form class="form-content-inner" action="/search" method="post">
                 <h1>Universities</h1>
-                <input type="text" id="keyword" placeholder="Search by keyword...">
-                <input type="submit">
+                <input type="radio" value="universities" name="category" checked>
+                <input type="text" id="keyword" name="keyword" placeholder="Search by keyword...">
+                <div class="form-row" id="instate">
+                  <b>Are you: </b>
+                  <label for="instate" id="in"class="radio-button"></label>
+                  <input type="radio" name="instate" id="instate" value="instate"> 
+                  <div class="label">In-State</div>
+                  <label for="outofstate" id="out"class="radio-button"></label>
+                  <input type="radio" name="instate" id="outofstate" value="outofstate">
+                  <div class="label">Out-of-State</div>
+                </div>
+                <div class="form-row" id="tuition">
+                  <b>Tuition: </b>
+                  {% for count in [10000, 25000, 50000, 75000] %}
+                    <label for="tuition-{{ count }}" id="{{ count }}"class="radio-button"></label>
+                    <input type="radio" name="tuition" value="{{ count }}" id="tuition-{{ count }}">
+                    <div class="label">< ${{ count }}</div>
+                  {% endfor %}
+                </div>
+                <div class="form-row" id="size">
+                  <b>Size: </b>
+                  {% for count in [5000, 15000, 30000, 100000] %}
+                    <label for="size-{{ count }}" id="{{ count }}" class="radio-button"></label>
+                    <input type="radio" name="size" value="{{ count }}" id="size-{{ count }}">
+                    <div class="label">< {{ count }}</div>
+                  {% endfor %}
+                </div>
+                <div class="form-row">
+                  <b>Admission Rate:</b>
+                  <input id="admission-min" name="admission-min" style="display: none;">
+                  <input id="admission-max" name="admission-max" style="display: none;">
+                  <div class="slider-wrapper" style="display: inline-block; margin-left: 20px">
+                    <div id="admission-rate"></div>
+                  </div>
+                </div>
+                <input type="submit" class="submit" id="universities">
               </form>
             </div>
           </div>
-          <div class="form" id="major">
+          <div class="form" id="majors">
             <div class="tab">
               Majors
             </div>
-            <form class="form-content" id="major">
-            </form>
-          </div>
-          <div class="form" id="job">
-            <div class="tab">
-              Jobs
+            <div class="form-content" id="majors">
+              <form class="form-content-inner" action="/search" method="post">
+                <h1>Majors</h1>
+                <input type="radio" value="majors" name="category" checked>
+                <input type="text" name="keyword" id="keyword" placeholder="Search by keyword...">
+                <div class="form-row" id="size">
+                  <b>Size: </b>
+                  {% for count in [5000, 15000, 30000, 100000] %}
+                    <label for="size-{{ count }}" id="{{ count }}" class="radio-button"></label>
+                    <input type="radio" name="size" value="{{ count }}" id="size-{{ count }}">
+                    <div class="label">< {{ count }}</div>
+                  {% endfor %}
+<!--                   <div id="5000"class="radio-button"></div> <input type="radio"> <div class="label">< 5000</div>
+                  <div id="15000"class="radio-button"></div> <input type="radio"> <div class="label">< 15000</div>
+                  <div id="30000"class="radio-button"></div> <input type="radio"> <div class="label">< 30000</div>
+                  <div id="100000"class="radio-button"></div> <input type="radio"> <div class="label"> > 30000</div> -->
+                </div>
+                <div class="form-row">
+                  <b>Average Salary:</b>
+                  <input id="salary-min" name="salary-min" style="display: none;">
+                  <input id="salary-max" name="salary-max" style="display: none;">
+                  <div class="slider-wrapper" style="display: inline-block; margin-left: 20px">
+                    <div id="average-salary"></div>
+                  </div>
+                </div>
+                <input type="submit" class="submit" id="majors">
+              </form>
             </div>
-            <form class="form-content" id="job">
-            </form>
+          </div>
+          <div class="form" id="careers">
+            <div class="tab">
+              Careers
+            </div>
+            <div class="form-content" id="careers">
+              <form class="form-content-inner" action="/search" method="post">
+                <h1>Careers</h1>
+                 <input type="radio" value="careers" name="category" checked>
+                <input type="text" id="keyword" name="keyword" placeholder="Search by keyword...">
+                <div class="form-row">
+                  <b>Average Salary:</b>
+                  <input id="salary-min" name="salary-min" style="display: none;">
+                  <input id="salary-max" name="salary-max" style="display: none;">
+                  <div class="slider-wrapper" style="display: inline-block; margin-left: 20px">
+                    <div id="careers-salary"></div>
+                  </div>
+                </div>
+                <input type="submit" class="submit" id="careers">
+              </form>
+            </div>
           </div>
         </div>
     	</div>

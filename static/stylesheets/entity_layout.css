@@ -33,6 +33,12 @@ a:hover {
 input:focus {
 	outline: none;
 }
+form {
+	text-align: left;
+}
+input[type="radio"] {
+	display: none;
+}
 #navbar {
 	background: #48BCA5;
 	height: 70px;
@@ -202,6 +208,7 @@ input:focus {
     width: 450px;
     padding: 0px 75px 0px 75px;
 }
+
 .form.active .tab {
 	-webkit-box-shadow: 0px -4px 8px -1px rgba(0,0,0,0.24);
     -moz-box-shadow: 0px -4px 8px -1px rgba(0,0,0,0.24);
@@ -212,10 +219,10 @@ input:focus {
 	box-shadow: 0px 0px 8px rgba(0, 0, 0, 0.25);
 	z-index: 1;
 }
-.form#major .tab {
+.form#majors .tab {
 	left: 125px;
 }
-.form#job .tab {
+.form#careers .tab {
 	left: 250px;
 }
 .form-content h1 {
@@ -243,7 +250,7 @@ input:focus {
 .form-content-inner input[type="text"]:focus {
 	border-bottom: 3px solid #48BCA5;
 }
-.form-content-inner input[type="submit"] {
+.submit {
 	height: 30px;
 	width: 100px;
 	font-family: "Nunito";
@@ -256,4 +263,58 @@ input:focus {
 	font-size: 14px;
 	cursor: pointer;
 	margin-top: 20px;
+	line-height: 30px;
+	text-align: center;
+}
+#admission-rate, #average-salary, #careers-salary{
+	width: 300px !important;
+	height: 10px;
+	border: 1px solid #48BCA5 !important;
+}
+.ui-widget-header {
+	background: #48BCA5;
+}
+.ui-slider-handle{
+	border-radius: 50%;
+	border: 1px solid #48BCA5 !important;
+	width: 25px !important;
+	font-family: "Nunito";
+	font-size: 8px;
+	font-weight: bolder !important;
+	height: 25px !important;
+	line-height: 25px;
+	text-align: center;
+	background: white !important;
+	top: -10px !important;
+}
+#average-salary .ui-slider-handle, #careers-salary .ui-slider-handle {
+	width: 40px !important;
+	border-radius: 5px;
+}
+.ui-slider-handle:focus {
+	outline: none;
+	background: #f6f6f6;
+	border: 1px solid #48BCA5;
+	color: black;
+}
+.form-row {
+	margin-top: 20px;
+	display: block;
+	position: relative;
+}
+.radio-button {
+	display: inline-block;
+	width: 10px;
+	height: 10px;
+	border: 1px solid #48BCA5;
+	cursor: pointer;
+	transition: 0.3s;
+	margin-left: 10px;
+}
+.label {
+	font-size: 12px !important;
+	display: inline-block;
+}
+.radio-button.active {
+	background: #48BCA5;
 }
