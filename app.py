@@ -294,7 +294,40 @@ def set_city():
 	else:
 		print(errorMsg)
 
+@app.route('/entryuniversity/')
+def set_university():
+	con = lite.connect("info257app.db")
+	cur = con.cursor()
 
+	columnNames = ["Name", "UG Admissions Rate", "Size", "In-State Tuition", "Out-State Tuition", "State", "City"]
+	columnData = ["name", "udadmitrate", 123, 12, 12, "Georgia", "Brunswick"]
+	errorMsg = ""
+
+	cur.execute("select count(*) from universities where name='{0}'".format(columnData[0]))
+	checkRepeats = cur.fetchall()[0][0]
+	if (checkRepeats > 0):
+		errorMsg = "University already exists in database! Add another university!"
+
+	cur.execute("select cityID from cities where state='{0}' and city='{1}'".format(columnData[5], columnData[6]))
+	checkID = cur.fetchall()
+	if (len(checkID) == 0):
+		errorMsg = "University's city does not exist in database! Add the city first!"
+
+	if (errorMsg == ""):
+		cityID = checkID[0][0]  
+		cur.execute("select max(universityID) from universities")
+		getNewID = cur.fetchall()[0][0]
+
+		cur.execute("insert into universities (universityID, name, ug_admissions_rate, size, in_state_tuition, out_state_tuition, cityID) values ({0}, '{1}', '{2}', {3}, {4}, {5}, {6})".format(getNewID+1,columnData[0],columnData[1],columnData[2],columnData[3],columnData[4],cityID))
+		cur.execute("select * from universities where name='{0}'".format(columnData[0]))
+		results = cur.fetchall()
+		print (results)
+	else:
+		print(errorMsg)
+
+
+
+		
 @app.errorhandler(404)
 def page_not_found(error):
     return render_template('page_not_found.html'), 404
