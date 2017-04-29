@@ -325,8 +325,42 @@ def set_university():
 	else:
 		print(errorMsg)
 
+@app.route('/entryuniversitymajor/')
+def set_universitymajor():
+	con = lite.connect("info257app.db")
+	cur = con.cursor()
 
+	columnNames = ["University Name", "Major Name"]
+	columnData = ["Massachusetts Maritime Academy", "Accounting"]
+	errorMsg = ""
 
+	cur.execute("select universityID from universities where name='{0}'".format(columnData[0]))
+	checkUniID = cur.fetchall()
+	cur.execute("select majorID from majors where name='{0}'".format(columnData[1]))
+	checkMajID = cur.fetchall()
+
+	if (len(checkUniID) == 0):
+		errorMsg = "University does not exist in database. Add university first!"
+	if (len(checkMajID) == 0):
+		errorMsg = "Major does not exist in database. Add major first!"
+
+	if (errorMsg == ""):
+		universityID = checkUniID[0][0]
+		majorID = checkMajID[0][0]
+		cur.execute("select count(*) from universitymajors where majorID={0} and universityID={1}".format(majorID, universityID))
+		checkRepeats = cur.fetchall()[0][0]
+		if (checkRepeats > 0):
+			errorMsg = "Linkage already exists in database! Add another linkage!"
+
+	if (errorMsg == ""):
+		cur.execute("insert into universitymajors (universityID, majorID) values ({0}, {1})".format(universityID,majorID))
+		cur.execute("select * from universitymajors where universityID='{0}' and majorID='{1}'".format(universityID,majorID))
+		results = cur.fetchall()
+		print (results)
+	else:
+		print(errorMsg)
+	
+	
 		
 @app.errorhandler(404)
 def page_not_found(error):
