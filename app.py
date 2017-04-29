@@ -360,7 +360,40 @@ def set_universitymajor():
 	else:
 		print(errorMsg)
 	
-	
+@app.route('/entrymajorcareer/')
+def set_majorcareer():
+	con = lite.connect("info257app.db")
+	cur = con.cursor()
+
+	columnNames = ["Career Name", "Major Name"]
+	columnData = ["Business Professor", "Animal Genetics"]
+	errorMsg = ""
+
+	cur.execute("select careerID from careers where name='{0}'".format(columnData[0]))
+	checkCarID = cur.fetchall()
+	cur.execute("select majorID from majors where name='{0}'".format(columnData[1]))
+	checkMajID = cur.fetchall()
+
+	if (len(checkCarID) == 0):
+		errorMsg = "Career does not exist in database. Add career first!"
+	if (len(checkMajID) == 0):
+		errorMsg = "Major does not exist in database. Add major first!"
+
+	if (errorMsg == ""):
+		careerID = checkCarID[0][0]
+		majorID = checkMajID[0][0]
+		cur.execute("select count(*) from majorCareers where majorID={0} and careerID={1}".format(majorID, careerID))
+		checkRepeats = cur.fetchall()[0][0]
+		if (checkRepeats > 0):
+			errorMsg = "Linkage already exists in database! Add another linkage!"
+
+	if (errorMsg == ""):
+		cur.execute("insert into majorCareers (careerID, majorID) values ({0}, {1})".format(careerID,majorID))
+		cur.execute("select * from majorCareers where careerID='{0}' and majorID='{1}'".format(careerID,majorID))
+		results = cur.fetchall()
+		print (results)
+	else:
+		print(errorMsg)
 		
 @app.errorhandler(404)
 def page_not_found(error):
