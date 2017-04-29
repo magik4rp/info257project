@@ -1,54 +1,4 @@
 
-""" Table Name: universities
-(0, 'universityID', 'INTEGER', 0, None, 0)
-(1, 'name', 'TEXT', 0, None, 0)
-(2, 'ug_admissions_rate', 'TEXT', 0, None, 0)
-(3, 'size', 'TEXT', 0, None, 0)
-(4, 'in_state_tuition', 'TEXT', 0, None, 0)
-(5, 'out_state_tuition', 'TEXT', 0, None, 0)
-(6, 'cityID', 'INTEGER', 0, None, 0)
-
-Table Name: majors
-(0, 'majorID', 'INTEGER', 0, None, 0)
-(1, 'name', 'TEXT', 0, None, 0)
-(2, 'description', 'TEXT', 0, None, 0)
-(3, 'average_salary', 'TEXT', 0, None, 0)
-(4, 'expected_growth', 'TEXT', 0, None, 0)
-(5, 'no_of_students', 'TEXT', 0, None, 0)
-(6, 'no_of_offering_schools', 'TEXT', 0, None, 0)
-
-Table Name: cities
-(0, 'cityID', 'INTEGER', 0, None, 0)
-(1, 'state', 'TEXT', 0, None, 0)
-(2, 'city', 'TEXT', 0, None, 0)
-(3, 'summer_temperature', 'TEXT', 0, None, 0)
-(4, 'winter_temperature', 'TEXT', 0, None, 0)
-
-Table Name: careers
-(0, 'careerID', 'INTEGER', 0, None, 0)
-(1, 'name', 'TEXT', 0, None, 0)
-(2, 'salary', 'TEXT', 0, None, 0)
-(3, 'growth', 'TEXT', 0, None, 0)
-(4, 'employment', 'TEXT', 0, None, 0)
-
-Table Name: majorcareers
-(0, 'majorID', 'REAL', 0, None, 0)
-(1, 'careerID', 'INTEGER', 0, None, 0)
-
-Table Name: universitymajors
-(0, 'universityID', 'REAL', 0, None, 0)
-(1, 'majorID', 'INTEGER', 0, None, 0)
-
-Table Name: applications
-(0, 'universityID', 'REAL', 0, None, 0)
-(1, 'majorID', 'INTEGER', 0, None, 0)
-(2, 'degree', 'TEXT', 0, None, 0)
-(3, 'decision', 'TEXT', 0, None, 0)
-(4, 'decision_method', 'TEXT', 0, None, 0)
-(5, 'ug_gpa', 'REAL', 0, None, 0)
-(6, 'gre_verbal', 'REAL', 0, None, 0)
-(7, 'gre_quant', 'REAL', 0, None, 0)
-(8, 'gre_writing', 'REAL', 0, None, 0) """
 
 
 from flask import Flask
@@ -63,6 +13,31 @@ from os import path
 
 app = Flask(__name__)
 resultsDict = []
+
+def getQuery(myDict):
+	category = myDict['category']
+	keyword = myDict['keyword']
+	query = "select * from " + category + " c"
+	if keyword != '':
+		query += " where c.name like '%" + keyword + "%'"
+	print("\nThis is the query: " + query)
+	return query
+
+
+
+@app.route('/search', methods=['POST'])
+def search():
+	print(request)
+	print(request.form)
+	values = request.form
+	query = getQuery(values)
+	
+	con = lite.connect("info257app.db")
+	cur = con.cursor()
+	cur.execute(query)
+	results = cur.fetchall()
+	print(results)
+	return redirect("/careers/2", code=303)
 
 @app.route('/')
 def home():
@@ -567,4 +542,6 @@ def get_universitymajors(id):
 	cur.execute("select id university, major from universitymajors where id = " + str(id))
 	rows = cur.fetchall()
 
-	return render_template("viewuniversitymajors.html", **locals())                                   
+	return render_template("viewuniversitymajors.html", **locals())  
+
+                              
