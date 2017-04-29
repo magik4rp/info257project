@@ -269,7 +269,32 @@ def set_major():
 	else:
 		print(errorMsg)
 		
+@app.route('/entrycity/')
+def set_city():
+	con = lite.connect("info257app.db")
+	cur = con.cursor()
+
+	columnNames = ["State", "City", "Summer Temperature", "Winter Temperature"]
+	columnData = ["state", "city", 123, 12]
+	errorMsg = ""
+
+	cur.execute("select count(*) from cities where state='{0}' and city='{1}'".format(columnData[0], columnData[1]))
+	checkRepeats = cur.fetchall()[0][0]
+	if (checkRepeats > 0):
+		errorMsg = "State/city already exists in database! Add another state/city!"
+
+	if (errorMsg == ""):
+		cur.execute("select max(cityID) from cities")
+		getNewID = cur.fetchall()[0][0]
 		
+		cur.execute("insert into cities (cityID, state, city, summer_temperature, winter_temperature) values ({0}, '{1}', '{2}', {3}, {4})".format(getNewID+1,columnData[0],columnData[1],columnData[2],columnData[3]))
+		cur.execute("select * from cities where state='{0}' and city='{1}'".format(columnData[0], columnData[1]))
+		results = cur.fetchall()
+		print (results)
+	else:
+		print(errorMsg)
+
+
 @app.errorhandler(404)
 def page_not_found(error):
     return render_template('page_not_found.html'), 404
