@@ -1,4 +1,54 @@
 
+""" Table Name: universities
+(0, 'universityID', 'INTEGER', 0, None, 0)
+(1, 'name', 'TEXT', 0, None, 0)
+(2, 'ug_admissions_rate', 'TEXT', 0, None, 0)
+(3, 'size', 'TEXT', 0, None, 0)
+(4, 'in_state_tuition', 'TEXT', 0, None, 0)
+(5, 'out_state_tuition', 'TEXT', 0, None, 0)
+(6, 'cityID', 'INTEGER', 0, None, 0)
+
+Table Name: majors
+(0, 'majorID', 'INTEGER', 0, None, 0)
+(1, 'name', 'TEXT', 0, None, 0)
+(2, 'description', 'TEXT', 0, None, 0)
+(3, 'average_salary', 'TEXT', 0, None, 0)
+(4, 'expected_growth', 'TEXT', 0, None, 0)
+(5, 'no_of_students', 'TEXT', 0, None, 0)
+(6, 'no_of_offering_schools', 'TEXT', 0, None, 0)
+
+Table Name: cities
+(0, 'cityID', 'INTEGER', 0, None, 0)
+(1, 'state', 'TEXT', 0, None, 0)
+(2, 'city', 'TEXT', 0, None, 0)
+(3, 'summer_temperature', 'TEXT', 0, None, 0)
+(4, 'winter_temperature', 'TEXT', 0, None, 0)
+
+Table Name: careers
+(0, 'careerID', 'INTEGER', 0, None, 0)
+(1, 'name', 'TEXT', 0, None, 0)
+(2, 'salary', 'TEXT', 0, None, 0)
+(3, 'growth', 'TEXT', 0, None, 0)
+(4, 'employment', 'TEXT', 0, None, 0)
+
+Table Name: majorcareers
+(0, 'majorID', 'REAL', 0, None, 0)
+(1, 'careerID', 'INTEGER', 0, None, 0)
+
+Table Name: universitymajors
+(0, 'universityID', 'REAL', 0, None, 0)
+(1, 'majorID', 'INTEGER', 0, None, 0)
+
+Table Name: applications
+(0, 'universityID', 'REAL', 0, None, 0)
+(1, 'majorID', 'INTEGER', 0, None, 0)
+(2, 'degree', 'TEXT', 0, None, 0)
+(3, 'decision', 'TEXT', 0, None, 0)
+(4, 'decision_method', 'TEXT', 0, None, 0)
+(5, 'ug_gpa', 'REAL', 0, None, 0)
+(6, 'gre_verbal', 'REAL', 0, None, 0)
+(7, 'gre_quant', 'REAL', 0, None, 0)
+(8, 'gre_writing', 'REAL', 0, None, 0) """
 
 
 from flask import Flask
@@ -13,31 +63,6 @@ from os import path
 
 app = Flask(__name__)
 resultsDict = []
-
-def getQuery(myDict):
-	category = myDict['category']
-	keyword = myDict['keyword']
-	query = "select * from " + category + " c"
-	if keyword != '':
-		query += " where c.name like '%" + keyword + "%'"
-	print("\nThis is the query: " + query)
-	return query
-
-
-
-@app.route('/search', methods=['POST'])
-def search():
-	print(request)
-	print(request.form)
-	values = request.form
-	query = getQuery(values)
-	
-	con = lite.connect("info257app.db")
-	cur = con.cursor()
-	cur.execute(query)
-	results = cur.fetchall()
-	print(results)
-	return redirect("/careers/2", code=303)
 
 @app.route('/')
 def home():
@@ -186,8 +211,8 @@ def get_result():
 	
 	return "hallooooo"
 
-@app.route('/entrycareers/')
-def set_careers():
+@app.route('/entrycareer/')
+def set_career():
 	
 	# columnData to be replaced with post data
 	# function produces results of data entry (row of entity entered) or errorMsg (non empty)
@@ -215,7 +240,36 @@ def set_careers():
 	else:
 		print(errorMsg)
 
+@app.route('/entrymajor/')
+def set_major():
+	
+	# columnData to be replaced with post data
+	# function produces results of data entry (row of entity entered) or errorMsg (non empty)
+	
+	con = lite.connect("info257app.db")
+	cur = con.cursor()
 
+	columnNames = ["Name", "Description", "Average Salary", "Expected Growth", "Number of Students", "Number of Offering Universities"]
+	columnData = ["name", "description", 123, 12, 12, 123]
+	errorMsg = ""
+
+	cur.execute("select count(*) from majors where name='{0}'".format(columnData[0]))
+	checkRepeats = cur.fetchall()[0][0]
+	if (checkRepeats > 0):
+		errorMsg = "Major already exists in database! Add another major!"
+
+	if (errorMsg == ""):
+		cur.execute("select max(majorID) from majors")
+		getNewID = cur.fetchall()[0][0]
+		
+		cur.execute("insert into majors (majorID, name, description, average_salary, expected_growth, no_of_students, no_of_offering_schools) values ({0}, '{1}', '{2}', {3}, {4}, {5}, {6})".format(getNewID+1,columnData[0],columnData[1],columnData[2],columnData[3],columnData[4],columnData[5]))
+		cur.execute("select * from majors where name='{0}'".format(columnData[0]))
+		results = cur.fetchall()
+		print (results)
+	else:
+		print(errorMsg)
+		
+		
 @app.errorhandler(404)
 def page_not_found(error):
     return render_template('page_not_found.html'), 404
@@ -542,6 +596,4 @@ def get_universitymajors(id):
 	cur.execute("select id university, major from universitymajors where id = " + str(id))
 	rows = cur.fetchall()
 
-	return render_template("viewuniversitymajors.html", **locals())  
-
-                              
+	return render_template("viewuniversitymajors.html", **locals())                                   
