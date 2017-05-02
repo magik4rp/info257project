@@ -161,10 +161,10 @@ def minisearch():
 	for table in ["universities", "careers", "majors", "cities"]:
 		if table =="cities":
 			cur.execute("select * from " + table + " c where  c.city like '%" + value + "%'")
-		elif table =="universities":
+		elif table == "universities":
 			cur.execute("select universityID, name, ug_admissions_rate, size, in_state_tuition, out_state_tuition from universities where name like '%" + value + "%'")
 		elif table =="majors":
-			cur.execute("select majorID, name, average_salary, expected_growth, no_of_students, no_of_offering_schools from majors")
+			cur.execute("select majorID, name, average_salary, expected_growth, no_of_students, no_of_offering_schools from majors where name like '%" + value + "%'")
 		else:
 			cur.execute("select * from " + table + " c where  c.name like '%" + value + "%'")
 		print(results)
@@ -203,7 +203,7 @@ def get_major(id):
 	cur.execute("select careers.name, careers.careerID from careers, majorcareers where majorID = " + str(id) + " and careers.careerID = majorcareers.careerID limit " + str(limitCareers))
 	careers = cur.fetchall()
 	
-	cur.execute("select universities.name, universities.universityID from universities, universitymajors where majorID = " + str(id) + " and universities.universityID = universitymajors.universityID limit " + str(limitUniversities))
+	cur.execute("select universities.name, universities.universityID from universities, universitymajors where majorID = " + str(id) + " and universities.universityID = universitymajors.universityID")
 	universities = cur.fetchall()
 	
 	return render_template("major.html", **locals())
@@ -626,17 +626,6 @@ def add_careers():
 
 		return redirect("/")
 
-
-@app.route("/careers/<int:id>")
-def get_careers(id):
-
-	con = lite.connect("info257app.db")
-	cur = con.cursor()
-	cur.execute("select name, salary, growth, employment from careers where id = " + str(id))
-	rows = cur.fetchall()
-	column_names = ["Name","Salary","Growth","Employment"]
-	return render_template("viewcareers.html", **locals())
-
 if __name__ == "__main__":
     app.run()
 
@@ -673,14 +662,6 @@ def add_cities():
 
 
 #@app.route("/cities/<int:id>")
-def get_cities(id):
-
-	con = lite.connect("cities.db")
-	cur = con.cursor()
-	cur.execute("select state, city, summer_temperature, winter_temperature from cities where id = " + str(id))
-	rows = cur.fetchall()
-	column_names = ["state", "city", "summer temperature", "winter temperature"]
-	return render_template("viewcities.html", **locals())
 
 # majorcareers
 
@@ -747,16 +728,6 @@ def add_majors():
 		return redirect("/")
 
 
-@app.route("/majors/<int:id>")
-def get_majors(id):
-
-	con = lite.connect("info257app.db")
-	cur = con.cursor()
-	cur.execute("select id name, description, average_salary, expected_growth, no_of_students, no_of_offering_schools from majors where id = " + str(id))
-	rows = cur.fetchall()
-
-	return render_template("viewmajors.html", **locals())
-
 # universities
 
 
@@ -784,14 +755,6 @@ def add_universities():
 
 
 #@app.route("/universities/<int:id>")
-def get_universities(id):
-
-	con = lite.connect("universities.db")
-	cur = con.cursor()
-	cur.execute("select name, ug_admissions_rate, size, in_state_tuition, out_state_tuition, state, city from universities where id = " + str(id))
-	rows = cur.fetchall()
-	column_names = ["name", "UG admissions rate", "size", "in state tuition", "out of state tuition", "state", "city"]
-	return render_template("viewuniversities.html", **locals())
 
 # universitymajors
 
