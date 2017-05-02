@@ -24,7 +24,7 @@ Table Name: cities
 (3, 'summer_temperature', 'TEXT', 0, None, 0)
 (4, 'winter_temperature', 'TEXT', 0, None, 0)
 
-Table Name: careerss
+Table Name: careers
 (0, 'careersID', 'INTEGER', 0, None, 0)
 (1, 'name', 'TEXT', 0, None, 0)
 (2, 'salary', 'TEXT', 0, None, 0)
@@ -50,12 +50,14 @@ Table Name: careerss
     </div>
     <div class="content" id="home">
     	<div class="inner">
-<!--     		<h2>What are you searching for?</h2>
-    		<div class="button" id="universities">Universities</div>
-    		<div class="button" id="majors">Majorss</div>
-    		<div class="button" id="job">Jobs</div> -->
-        <div class="forms">
-          <div class="form active" id="universities">
+        <div class="buttons">
+          <h1>What are you looking for?</h1><br>
+          <div id="universities" class="button">Universities</div>
+          <div id="majors" class="button">Majors</div>
+          <div id="careers" class="button">Careers</div>
+        </div>
+        <div class="forms" style="display: none; opacity: 0;">
+          <div class="form" id="universities">
             <div class="tab">
               Universities
             </div>
@@ -66,12 +68,11 @@ Table Name: careerss
                 <input type="text" id="keyword" name="keyword" placeholder="Search by keyword...">
                 <div class="form-row" id="instate">
                   <b>Are you: </b>
-                  <label for="instate" id="in"class="radio-button"></label>
-                  <input type="radio" name="instate" id="instate" value="instate"> 
-                  <div class="label">In-State</div>
-                  <label for="outofstate" id="out"class="radio-button"></label>
-                  <input type="radio" name="instate" id="outofstate" value="outofstate">
-                  <div class="label">Out-of-State</div>
+                  {% for count in [("true", "In-State"), ("false", "Out-of-State")] %}
+                    <label for="instate-{{ count[0] }}" class="radio-button"></label>
+                    <input type="radio" name="instate" value="{{ count[0] }}" id="instate-{{ count[0] }}">
+                    <div class="label"> {{ count[1] }}</div>
+                  {% endfor %}
                 </div>
                 <div class="form-row" id="tuition">
                   <b>Tuition: </b>
@@ -114,13 +115,9 @@ Table Name: careerss
                   <b>Size: </b>
                   {% for count in [5000, 15000, 30000, 100000] %}
                     <label for="size-{{ count }}" id="{{ count }}" class="radio-button"></label>
-                    <input type="radio" name="size" value="{{ count }}" id="size-{{ count }}">
+                    <input type="radio" name="major-size" value="{{ count }}" id="size-{{ count }}">
                     <div class="label">< {{ count }}</div>
                   {% endfor %}
-<!--                   <div id="5000"class="radio-button"></div> <input type="radio"> <div class="label">< 5000</div>
-                  <div id="15000"class="radio-button"></div> <input type="radio"> <div class="label">< 15000</div>
-                  <div id="30000"class="radio-button"></div> <input type="radio"> <div class="label">< 30000</div>
-                  <div id="100000"class="radio-button"></div> <input type="radio"> <div class="label"> > 30000</div> -->
                 </div>
                 <div class="form-row">
                   <b>Average Salary:</b>
@@ -145,8 +142,8 @@ Table Name: careerss
                 <input type="text" id="keyword" name="keyword" placeholder="Search by keyword...">
                 <div class="form-row">
                   <b>Average Salary:</b>
-                  <input id="salary-min" name="salary-min" style="display: none;">
-                  <input id="salary-max" name="salary-max" style="display: none;">
+                  <input id="salary-min" name="career-salary-min" style="display: none;">
+                  <input id="salary-max" name="career-salary-max" style="display: none;">
                   <div class="slider-wrapper" style="display: inline-block; margin-left: 20px">
                     <div id="careers-salary"></div>
                   </div>

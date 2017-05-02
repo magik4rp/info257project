@@ -12,10 +12,11 @@
     <div id="navbar">
       <a href="/" id="logo"><img src="{{ url_for('static', filename='images/gradhat.png') }}"></a>
       <div id="name">GladCap</div>
-      <div id="search">
-        <input type="text" placeholder="Search something...">
+      <form id="search" action="/mini-search" method="post">
+        <input type="text" name="keyword" placeholder="Search something...">
         <img src="{{ url_for('static', filename='images/search.png') }}">
-      </div>
+        <input type="submit" style="display: none">
+      </form>
     </div>
     <div id="content">{% block content %}{% endblock %}</div>
     <div id="footer">

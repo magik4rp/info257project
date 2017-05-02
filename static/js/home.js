@@ -14,9 +14,15 @@ $(document).ready(function() {
 		});
    	});
    	$(".button").click(function() {
-   		$(".inner").fadeTo(200, 0, function(){
+   		$(".buttons").fadeTo(300, 0, function(){
    			$(this).empty();
    		});
+   		var id = $(this).attr("id");
+   		window.setTimeout(function() {
+   			$(".forms").css("display", "block").fadeTo(400, 1, function() {
+   				$(".form#" + id).addClass("active");
+   			});
+   		}, 300);
    	});
    	$(".tab").click(function() {
    		$(".form.active").removeClass("active");
@@ -132,7 +138,7 @@ $(document).ready(function() {
    		values.category = category;
    		$.ajax({
             url: '/search',
-            data: values,
+            data: $("#" + category + " form").serialize(),
             // data: $("#" + category + " form").serialize(),
             type: 'POST',
             success: function(response) {

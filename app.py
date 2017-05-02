@@ -14,12 +14,71 @@ from os import path
 app = Flask(__name__)
 resultsDict = []
 
+def getHeaders(table):
+	if table == "majors":
+		return ["ID", "Name", "Description", "Average Salary", "Expected Growth", "Number of Students", "Number of Offering Universities"]
+	elif table == "cities":
+		return ["ID", "State", "City", "Summer Temperature", "Winter Temperature"]
+	elif table == "universities":
+		return ["ID", "Name", "Admissions Rate", "Size", "In-State Tuition", "Out-State Tuition"]
+	elif table == "careers":
+		return ["ID", "Name", "Salary", "Growth", "Employment"]
+
 def getQuery(myDict):
-	category = myDict['category']
-	keyword = myDict['keyword']
+	myDict = myDict.to_dict()
+	category = myDict.pop("category")
 	query = "select * from " + category + " c"
-	if keyword != '':
-		query += " where c.name like '%" + keyword + "%'"
+	conjunction_count = 0
+	seen = False 
+	instate = False
+	tuition = "100000"
+	for term in myDict.items():
+		key = term[0]
+		value = term[1]
+		#process key here (sorry its so messy)
+		if value != "":
+			conjunction = "AND"
+			if conjunction_count == 0:
+				conjunction = " WHERE"
+			conjunction_count += 1
+			if key == "keyword":
+				query += " " + conjunction + " c.name like '%" + value + "%'"
+			elif key == "admission-min":
+				query += " " + conjunction +" c.ug_admissions_rate > " + value
+			elif key == "admission-max":
+				query += " " + conjunction +" c.ug_admissions_rate < " + value
+			elif key == "size":
+				query += " " + conjunction +" c.size < " + value
+			elif key == "instate":
+				if seen and value == "true":
+					query += " " + conjunction +" c.in_state_tuition < " + tuition
+				elif seen and value == "false":
+					query += " " + conjunction +" c.out_state_tuition < " + tuition
+				else:
+					seen = True
+					conjunction_count -= 1
+					if instate == "true":
+						instate = True
+			elif key == "tuition":
+				if seen:
+					if instate: 
+						query += " " + conjunction +" c.in_state_tuition < " + value
+					else:
+						query += " " + conjunction +" c.out_state_tuition < " + value
+				else:
+					conjunction_count -= 1
+					tuition = value
+					seen = True
+			elif key == "major-size":
+				query += " " + conjunction + " c.no_of_students < " + value
+			elif key == "salary-min":
+				query += " " + conjunction + " c.average_salary > " + value
+			elif key == "salary-max":
+				query += " " + conjunction + " c.average_salary < " + value
+			elif key == "career-salary-min":
+				query += " " + conjunction + " c.salary > " + value
+			elif key == "career-salary-max":
+				query += " " + conjunction + " c.salary < " + value
 	print("\nThis is the query: " + query)
 	return query
 
@@ -27,17 +86,37 @@ def getQuery(myDict):
 
 @app.route('/search', methods=['POST'])
 def search():
-	print(request)
-	print(request.form)
 	values = request.form
+	headers = getHeaders(values['category'])
 	query = getQuery(values)
-	
+
 	con = lite.connect("info257app.db")
 	cur = con.cursor()
 	cur.execute(query)
-	results = cur.fetchall()
+	results = {values['category']: {"results": cur.fetchall(), "headers": headers}}
+
 	print(results)
-	return redirect("/careers/2", code=303)
+	return render_template("result.html", **locals())
+
+@app.route('/mini-search', methods=['POST'])
+def minisearch():
+	values = request.form
+	con = lite.connect("info257app.db")
+	cur = con.cursor()
+	results = {}
+	value = values['keyword']
+	for table in ["universities", "careers", "majors", "cities"]:
+		if table =="cities":
+			cur.execute("select * from " + table + " c where  c.city like '%" + value + "%'")
+		elif table =="universities":
+			cur.execute("select universityID, name, ug_admissions_rate, size, in_state_tuition, out_state_tuition from universities where name like '%" + value + "%'")
+		else:
+			cur.execute("select * from " + table + " c where  c.name like '%" + value + "%'")
+		print(results)
+		result = cur.fetchall()
+		if result != []:
+			results[table] = {"results": result, "headers": getHeaders(table)}
+	return render_template("result.html", **locals())
 
 @app.route('/')
 def home():
@@ -91,7 +170,7 @@ def get_university(id):
 	columnNames_info = ["State", "City"]
 	limitMajors = 6
 	
-	cur.execute("select * from universities where universityID = " + str(id))
+	cur.execute("select universityID, name, ug_admissions_rate, size, in_state_tuition, out_state_tuition from universities where universityID = " + str(id))
 	universities = cur.fetchall()
 	
 	cur.execute("select state, city from universities, cities where universities.universityID = " + str(id) + " and cities.cityID = universities.cityID")

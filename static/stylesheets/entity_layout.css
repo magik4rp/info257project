@@ -39,6 +39,13 @@ form {
 input[type="radio"] {
 	display: none;
 }
+th {
+	text-align: left !important;
+}
+table {
+    table-layout : fixed;
+    width: 100% !important;
+}
 #navbar {
 	background: #48BCA5;
 	height: 70px;
@@ -317,4 +324,11 @@ input[type="radio"] {
 }
 .radio-button.active {
 	background: #48BCA5;
+}
+.table-title {
+	text-transform: capitalize;
+	border-bottom: 2px solid #48BCA5;
+}
+.results#content {
+	width: 80% !important;
 }

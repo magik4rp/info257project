@@ -1,8 +1,9 @@
 {% extends "entity_layout.html" %}
-{% block title %}Computer Science{% endblock %}
+{% block title %}{{ majors[0][1] }}{% endblock %}
 {% block head %}
   {{ super() }}
 {% endblock %}
+<div class="results">
 {% block content %}
 	<div class="header">
 		<h3>Major</h3>
@@ -30,3 +31,4 @@
 	</div>
 	{% endif %}
 {% endblock %}
+</div>
