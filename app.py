@@ -1,4 +1,54 @@
 
+""" Table Name: universities
+(0, 'universityID', 'INTEGER', 0, None, 0)
+(1, 'name', 'TEXT', 0, None, 0)
+(2, 'ug_admissions_rate', 'TEXT', 0, None, 0)
+(3, 'size', 'TEXT', 0, None, 0)
+(4, 'in_state_tuition', 'TEXT', 0, None, 0)
+(5, 'out_state_tuition', 'TEXT', 0, None, 0)
+(6, 'cityID', 'INTEGER', 0, None, 0)
+
+Table Name: majors
+(0, 'majorID', 'INTEGER', 0, None, 0)
+(1, 'name', 'TEXT', 0, None, 0)
+(2, 'description', 'TEXT', 0, None, 0)
+(3, 'average_salary', 'TEXT', 0, None, 0)
+(4, 'expected_growth', 'TEXT', 0, None, 0)
+(5, 'no_of_students', 'TEXT', 0, None, 0)
+(6, 'no_of_offering_schools', 'TEXT', 0, None, 0)
+
+Table Name: cities
+(0, 'cityID', 'INTEGER', 0, None, 0)
+(1, 'state', 'TEXT', 0, None, 0)
+(2, 'city', 'TEXT', 0, None, 0)
+(3, 'summer_temperature', 'TEXT', 0, None, 0)
+(4, 'winter_temperature', 'TEXT', 0, None, 0)
+
+Table Name: careers
+(0, 'careerID', 'INTEGER', 0, None, 0)
+(1, 'name', 'TEXT', 0, None, 0)
+(2, 'salary', 'TEXT', 0, None, 0)
+(3, 'growth', 'TEXT', 0, None, 0)
+(4, 'employment', 'TEXT', 0, None, 0)
+
+Table Name: majorcareers
+(0, 'majorID', 'REAL', 0, None, 0)
+(1, 'careerID', 'INTEGER', 0, None, 0)
+
+Table Name: universitymajors
+(0, 'universityID', 'REAL', 0, None, 0)
+(1, 'majorID', 'INTEGER', 0, None, 0)
+
+Table Name: applications
+(0, 'universityID', 'REAL', 0, None, 0)
+(1, 'majorID', 'INTEGER', 0, None, 0)
+(2, 'degree', 'TEXT', 0, None, 0)
+(3, 'decision', 'TEXT', 0, None, 0)
+(4, 'decision_method', 'TEXT', 0, None, 0)
+(5, 'ug_gpa', 'REAL', 0, None, 0)
+(6, 'gre_verbal', 'REAL', 0, None, 0)
+(7, 'gre_quant', 'REAL', 0, None, 0)
+(8, 'gre_writing', 'REAL', 0, None, 0) """
 
 
 from flask import Flask
@@ -13,6 +63,7 @@ from os import path
 
 app = Flask(__name__)
 resultsDict = []
+
 
 def getHeaders(table):
 	if table == "majors":
@@ -265,7 +316,190 @@ def get_result():
 	
 	return "hallooooo"
 
+@app.route('/entrycareer/')
+def set_career():
 	
+	# columnData to be replaced with post data
+	# function produces results of data entry (row of entity entered) or errorMsg (non empty)
+	
+	con = lite.connect("info257app.db")
+	cur = con.cursor()
+
+	columnNames = ["Name", "Salary", "Growth", "Employment"]
+	columnData = ["name", 1234, 123, 12] 
+	errorMsg = ""
+
+	cur.execute("select count(*) from careers where name='{0}'".format(columnData[0]))
+	checkRepeats = cur.fetchall()[0][0]
+	if (checkRepeats > 0):
+		errorMsg = "Career already exists in database! Add another career!"
+
+	if (errorMsg == ""):
+		cur.execute("select max(careerID) from careers")
+		getNewID = cur.fetchall()[0][0]
+
+		cur.execute("insert into careers (careerID, name, salary, growth, employment) values ({0}, '{1}', {2}, {3}, {4})".format(getNewID+1,columnData[0],columnData[1],columnData[2],columnData[3]))
+		cur.execute("select * from careers where name='{0}'".format(columnData[0]))
+		results = cur.fetchall()
+		print (results)
+	else:
+		print(errorMsg)
+
+@app.route('/entrymajor/')
+def set_major():
+	
+	# columnData to be replaced with post data
+	# function produces results of data entry (row of entity entered) or errorMsg (non empty)
+	
+	con = lite.connect("info257app.db")
+	cur = con.cursor()
+
+	columnNames = ["Name", "Description", "Average Salary", "Expected Growth", "Number of Students", "Number of Offering Universities"]
+	columnData = ["name", "description", 123, 12, 12, 123]
+	errorMsg = ""
+
+	cur.execute("select count(*) from majors where name='{0}'".format(columnData[0]))
+	checkRepeats = cur.fetchall()[0][0]
+	if (checkRepeats > 0):
+		errorMsg = "Major already exists in database! Add another major!"
+
+	if (errorMsg == ""):
+		cur.execute("select max(majorID) from majors")
+		getNewID = cur.fetchall()[0][0]
+		
+		cur.execute("insert into majors (majorID, name, description, average_salary, expected_growth, no_of_students, no_of_offering_schools) values ({0}, '{1}', '{2}', {3}, {4}, {5}, {6})".format(getNewID+1,columnData[0],columnData[1],columnData[2],columnData[3],columnData[4],columnData[5]))
+		cur.execute("select * from majors where name='{0}'".format(columnData[0]))
+		results = cur.fetchall()
+		print (results)
+	else:
+		print(errorMsg)
+		
+@app.route('/entrycity/')
+def set_city():
+	con = lite.connect("info257app.db")
+	cur = con.cursor()
+
+	columnNames = ["State", "City", "Summer Temperature", "Winter Temperature"]
+	columnData = ["state", "city", 123, 12]
+	errorMsg = ""
+
+	cur.execute("select count(*) from cities where state='{0}' and city='{1}'".format(columnData[0], columnData[1]))
+	checkRepeats = cur.fetchall()[0][0]
+	if (checkRepeats > 0):
+		errorMsg = "State/city already exists in database! Add another state/city!"
+
+	if (errorMsg == ""):
+		cur.execute("select max(cityID) from cities")
+		getNewID = cur.fetchall()[0][0]
+		
+		cur.execute("insert into cities (cityID, state, city, summer_temperature, winter_temperature) values ({0}, '{1}', '{2}', {3}, {4})".format(getNewID+1,columnData[0],columnData[1],columnData[2],columnData[3]))
+		cur.execute("select * from cities where state='{0}' and city='{1}'".format(columnData[0], columnData[1]))
+		results = cur.fetchall()
+		print (results)
+	else:
+		print(errorMsg)
+
+@app.route('/entryuniversity/')
+def set_university():
+	con = lite.connect("info257app.db")
+	cur = con.cursor()
+
+	columnNames = ["Name", "UG Admissions Rate", "Size", "In-State Tuition", "Out-State Tuition", "State", "City"]
+	columnData = ["name", "udadmitrate", 123, 12, 12, "Georgia", "Brunswick"]
+	errorMsg = ""
+
+	cur.execute("select count(*) from universities where name='{0}'".format(columnData[0]))
+	checkRepeats = cur.fetchall()[0][0]
+	if (checkRepeats > 0):
+		errorMsg = "University already exists in database! Add another university!"
+
+	cur.execute("select cityID from cities where state='{0}' and city='{1}'".format(columnData[5], columnData[6]))
+	checkID = cur.fetchall()
+	if (len(checkID) == 0):
+		errorMsg = "University's city does not exist in database! Add the city first!"
+
+	if (errorMsg == ""):
+		cityID = checkID[0][0]  
+		cur.execute("select max(universityID) from universities")
+		getNewID = cur.fetchall()[0][0]
+
+		cur.execute("insert into universities (universityID, name, ug_admissions_rate, size, in_state_tuition, out_state_tuition, cityID) values ({0}, '{1}', '{2}', {3}, {4}, {5}, {6})".format(getNewID+1,columnData[0],columnData[1],columnData[2],columnData[3],columnData[4],cityID))
+		cur.execute("select * from universities where name='{0}'".format(columnData[0]))
+		results = cur.fetchall()
+		print (results)
+	else:
+		print(errorMsg)
+
+@app.route('/entryuniversitymajor/')
+def set_universitymajor():
+	con = lite.connect("info257app.db")
+	cur = con.cursor()
+
+	columnNames = ["University Name", "Major Name"]
+	columnData = ["Massachusetts Maritime Academy", "Accounting"]
+	errorMsg = ""
+
+	cur.execute("select universityID from universities where name='{0}'".format(columnData[0]))
+	checkUniID = cur.fetchall()
+	cur.execute("select majorID from majors where name='{0}'".format(columnData[1]))
+	checkMajID = cur.fetchall()
+
+	if (len(checkUniID) == 0):
+		errorMsg = "University does not exist in database. Add university first!"
+	if (len(checkMajID) == 0):
+		errorMsg = "Major does not exist in database. Add major first!"
+
+	if (errorMsg == ""):
+		universityID = checkUniID[0][0]
+		majorID = checkMajID[0][0]
+		cur.execute("select count(*) from universitymajors where majorID={0} and universityID={1}".format(majorID, universityID))
+		checkRepeats = cur.fetchall()[0][0]
+		if (checkRepeats > 0):
+			errorMsg = "Linkage already exists in database! Add another linkage!"
+
+	if (errorMsg == ""):
+		cur.execute("insert into universitymajors (universityID, majorID) values ({0}, {1})".format(universityID,majorID))
+		cur.execute("select * from universitymajors where universityID='{0}' and majorID='{1}'".format(universityID,majorID))
+		results = cur.fetchall()
+		print (results)
+	else:
+		print(errorMsg)
+	
+@app.route('/entrymajorcareer/')
+def set_majorcareer():
+	con = lite.connect("info257app.db")
+	cur = con.cursor()
+
+	columnNames = ["Career Name", "Major Name"]
+	columnData = ["Business Professor", "Animal Genetics"]
+	errorMsg = ""
+
+	cur.execute("select careerID from careers where name='{0}'".format(columnData[0]))
+	checkCarID = cur.fetchall()
+	cur.execute("select majorID from majors where name='{0}'".format(columnData[1]))
+	checkMajID = cur.fetchall()
+
+	if (len(checkCarID) == 0):
+		errorMsg = "Career does not exist in database. Add career first!"
+	if (len(checkMajID) == 0):
+		errorMsg = "Major does not exist in database. Add major first!"
+
+	if (errorMsg == ""):
+		careerID = checkCarID[0][0]
+		majorID = checkMajID[0][0]
+		cur.execute("select count(*) from majorCareers where majorID={0} and careerID={1}".format(majorID, careerID))
+		checkRepeats = cur.fetchall()[0][0]
+		if (checkRepeats > 0):
+			errorMsg = "Linkage already exists in database! Add another linkage!"
+
+	if (errorMsg == ""):
+		cur.execute("insert into majorCareers (careerID, majorID) values ({0}, {1})".format(careerID,majorID))
+		cur.execute("select * from majorCareers where careerID='{0}' and majorID='{1}'".format(careerID,majorID))
+		results = cur.fetchall()
+		print (results)
+	else:
+		print(errorMsg)
+		
 @app.errorhandler(404)
 def page_not_found(error):
     return render_template('page_not_found.html'), 404
@@ -298,8 +532,7 @@ def view_all_applications():
 	cur = con.cursor()
 	cur.execute("select university, major, degree, decision, decision_method, ug_gpa, gre_verbal, gre_quant, gre_writing from applications")
 	rows = cur.fetchall()
-	column_names = ["University","Major","Degree","Decision","Decision_Method","UG_GPA","GRE_Verbal","GRE_Quant","GRE_Writing"]
-	
+
 	return render_template("index.html", **locals())
 
 @app.route("/addapplications", methods=["GET", "POST"])
@@ -348,8 +581,7 @@ def view_all_careers():
 	cur = con.cursor()
 	cur.execute("select name, salary, growth, employment from careers")
 	rows = cur.fetchall()
-	column_names = ["Name","Salary","Growth","Employment"]
-	
+
 	return render_template("index.html", **locals())
 
 @app.route("/addcareers", methods=["GET", "POST"])
@@ -394,8 +626,7 @@ def view_all_cities():
 	cur = con.cursor()
 	cur.execute("select state, city, summer_temperature, winter_temperature")
 	rows = cur.fetchall()
-	column_names = ["state", "city", "summer temperature", "winter temperature"]
-	
+
 	return render_template("index.html", **locals())
 
 @app.route("/addcities", methods=["GET", "POST"])
@@ -411,9 +642,10 @@ def add_cities():
 		winter_temperature = request.form["winter_temperature"]
 
 		con = lite.connect("cities.db")
-		if con:
+		with con:
 			cur = con.cursor()
-			cur.execute("insert into cities (state, city, summer_temperature, winter_temperature) values ('{}', '{}')").format(state, city, summer_temperature, winter_temperature)
+			cur.execute("insert into cities (state, city, summer_temperature, winter_temperature) values ('{}', '{}')".format(state, city, summer_temperature, winter_temperature))
+
 		return redirect("/")
 
 
@@ -436,7 +668,6 @@ def view_all_majorcareers():
 	cur = con.cursor()
 	cur.execute("select major, career from majorcareers")
 	rows = cur.fetchall()
-	column_names = ["Major", "Career"]
 
 	return render_template("index.html", **locals())
 
@@ -465,7 +696,6 @@ def get_majorcareers(id):
 	cur = con.cursor()
 	cur.execute("select id major, career from majorcareers where id = " + str(id))
 	rows = cur.fetchall()
-	column_names = ["Major", "Career"]
 
 	return render_template("viewmajorcareers.html", **locals())
                                     
@@ -478,7 +708,6 @@ def view_all_majors():
 	cur = con.cursor()
 	cur.execute("select name, description, average_salary, expected_growth, no_of_students, no_of_offering_schools from majors")
 	rows = cur.fetchall()
-	columnNames = ["ID", "Name", "Description", "Average Salary", "Expected Growth", "Number of Students", "Number of Offering Universities"]
 
 	return render_template("index.html", **locals())
 
@@ -511,7 +740,6 @@ def get_majors(id):
 	cur = con.cursor()
 	cur.execute("select id name, description, average_salary, expected_growth, no_of_students, no_of_offering_schools from majors where id = " + str(id))
 	rows = cur.fetchall()
-	columnNames = ["ID", "Name", "Description", "Average Salary", "Expected Growth", "Number of Students", "Number of Offering Universities"]
 
 	return render_template("viewmajors.html", **locals())
 
@@ -522,10 +750,9 @@ def view_all_universities():
 	
 	con = lite.connect("universities.db")
 	cur = con.cursor()
-	cur.execute("select name, ug_admissions_rate, size, in_state_tuition, out_state_tuition, cityID from universities")
+	cur.execute("select name, ug_admissions_rate, size, in_state_tuition, out_state_tuition, state, city from universities")
 	rows = cur.fetchall()
-	column_names = ["name", "UG admissions rate", "size", "in state tuition", "out of state tuition", "city"]
-	
+
 	return render_template("index.html", **locals())
 
 @app.route("/adduniversities", methods=["GET", "POST"])
@@ -540,7 +767,8 @@ def add_universities():
 		size = request.form["size"]
 		in_state_tuition = request.form["in_state_tuition"]
 		out_state_tuition = request.form["out_state_tuition"]
-		cityID = request.form["city"]
+		city = request.form["city"]
+		state = request.form["state"]
 
 		con = lite.connect("universities.db")
 		with con:
@@ -557,7 +785,7 @@ def get_universities(id):
 	cur = con.cursor()
 	cur.execute("select name, ug_admissions_rate, size, in_state_tuition, out_state_tuition, state, city from universities where id = " + str(id))
 	rows = cur.fetchall()
-	column_names = ["name", "UG admissions rate", "size", "in state tuition", "out of state tuition", "city"]
+	column_names = ["name", "UG admissions rate", "size", "in state tuition", "out of state tuition", "state", "city"]
 	return render_template("viewuniversities.html", **locals())
 
 # universitymajors
@@ -569,7 +797,6 @@ def view_all_universitymajors():
 	cur = con.cursor()
 	cur.execute("select university, major from universitymajors")
 	rows = cur.fetchall()
-	column_names = ["University", "Major"]
 
 	return render_template("index.html", **locals())
 
@@ -598,8 +825,5 @@ def get_universitymajors(id):
 	cur = con.cursor()
 	cur.execute("select id university, major from universitymajors where id = " + str(id))
 	rows = cur.fetchall()
-	column_names = ["University", "Major"]
 
-	return render_template("viewuniversitymajors.html", **locals())  
-
-                              
+	return render_template("viewuniversitymajors.html", **locals())                                   
