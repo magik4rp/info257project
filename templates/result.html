@@ -12,6 +12,11 @@
     <div id="navbar">
       <a href="/" id="logo"><img src="{{ url_for('static', filename='images/gradhat.png') }}"></a>
       <div id="name">GladCap</div>
+      <div class="nav-buttons">
+        <a href="/universities" class="nav-item">Universities</a>
+        <a href="/majors" class="nav-item">Majors</a>
+        <a href="/careers" class="nav-item">Careers</a>
+      </div>
       <form id="search" action="/mini-search" method="post">
         <input type="text" name="keyword" placeholder="Search something...">
         <img src="{{ url_for('static', filename='images/search.png') }}">
@@ -23,14 +28,15 @@
 		<h2 class="table-title"> {{ key }} </h2>
 		<table>	
 			<tr>
-			{% for header in value["headers"][1:]%}
-				<th>{{ header }}</th>
-			{% endfor %}
+				<th class="wide">{{ value["headers"][1] }}</th>
+				{% for header in value["headers"][2:]%}
+					<th>{{ header }}</th>
+				{% endfor %}
 			</tr>
 			{% for row in value["results"] %}
 			
 			<tr>
-				<td>
+				<td class="wide">
 					<a href="/{{ key }}/{{ row[0] }}">
 						{{ row[1] }}
 					</a>

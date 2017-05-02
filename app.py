@@ -67,7 +67,7 @@ resultsDict = []
 
 def getHeaders(table):
 	if table == "majors":
-		return ["ID", "Name", "Description", "Average Salary", "Expected Growth", "Number of Students", "Number of Offering Universities"]
+		return ["ID", "Name", "Average Salary", "Expected Growth", "Number of Students", "Number of Offering Universities"]
 	elif table == "cities":
 		return ["ID", "State", "City", "Summer Temperature", "Winter Temperature"]
 	elif table == "universities":
@@ -79,6 +79,8 @@ def getQuery(myDict):
 	myDict = myDict.to_dict()
 	category = myDict.pop("category")
 	query = "select * from " + category + " c"
+	if category == "majors":
+		query = "select majorID, name, average_salary, expected_growth, no_of_students, no_of_offering_schools from majors c"
 	conjunction_count = 0
 	seen = False 
 	instate = False
@@ -161,6 +163,8 @@ def minisearch():
 			cur.execute("select * from " + table + " c where  c.city like '%" + value + "%'")
 		elif table =="universities":
 			cur.execute("select universityID, name, ug_admissions_rate, size, in_state_tuition, out_state_tuition from universities where name like '%" + value + "%'")
+		elif table =="majors":
+			cur.execute("select majorID, name, average_salary, expected_growth, no_of_students, no_of_offering_schools from majors")
 		else:
 			cur.execute("select * from " + table + " c where  c.name like '%" + value + "%'")
 		print(results)
@@ -173,6 +177,16 @@ def minisearch():
 def home():
 	return render_template("home.html")
 
+@app.route("/majors")
+def view_all_majors():
+	
+	con = lite.connect("info257app.db")
+	cur = con.cursor()
+	cur.execute("select majorID, name, average_salary, expected_growth, no_of_students, no_of_offering_schools from majors")
+	rows = sorted(cur.fetchall(), key=lambda row: row[1]) 
+	results = {"majors": {"results": rows, "headers": getHeaders("majors")}}
+	return render_template("result.html", **locals())
+
 @app.route('/majors/<int:id>')
 def get_major(id):
 	
@@ -180,8 +194,8 @@ def get_major(id):
 	cur = con.cursor()
 	
 	columnNames = ["ID", "Name", "Description", "Average Salary", "Expected Growth", "Number of Students", "Number of Offering Universities"]
-	limitCareers = 6
-	limitUniversities = 6
+	limitCareers = 25
+	limitUniversities = 10
 	
 	cur.execute("select * from majors where majorID = " + str(id))
 	majors = cur.fetchall()
@@ -201,7 +215,7 @@ def get_city(id):
 	cur = con.cursor()
 	
 	columnNames = ["ID", "State", "City", "Summer Temperature", "Winter Temperature"]
-	limitUniversities = 6
+	limitUniversities = 10
 	
 	cur.execute("select * from cities where cityID = " + str(id))
 	cities = cur.fetchall()
@@ -211,6 +225,16 @@ def get_city(id):
 	
 	return render_template("city.html", **locals())
 
+@app.route("/universities")
+def view_all_universities():
+	
+	con = lite.connect("info257app.db")
+	cur = con.cursor()
+	cur.execute("select universityID, name, ug_admissions_rate, size, in_state_tuition, out_state_tuition from universities")
+	rows = sorted(cur.fetchall(), key= lambda row: row[1])
+	results = {"universities": {"results": rows, "headers": getHeaders("universities")}}
+	return render_template("result.html", **locals())
+
 @app.route('/universities/<int:id>')
 def get_university(id):
 	
@@ -219,7 +243,7 @@ def get_university(id):
 	
 	columnNames = ["ID", "Name", "UG Admissions Rate", "Size", "In-State Tuition", "Out-State Tuition"]
 	columnNames_info = ["State", "City"]
-	limitMajors = 6
+	limitMajors = 10
 	
 	cur.execute("select universityID, name, ug_admissions_rate, size, in_state_tuition, out_state_tuition from universities where universityID = " + str(id))
 	universities = cur.fetchall()
@@ -231,7 +255,17 @@ def get_university(id):
 	majors = cur.fetchall()
 	
 	return render_template("university.html", **locals())
+
+@app.route("/careers")
+def view_all_careers():
 	
+	con = lite.connect("info257app.db")
+	cur = con.cursor()
+	cur.execute("select careerID, name, salary, growth, employment from careers")
+	rows =  sorted(cur.fetchall(), key=lambda row: row[1]) 
+	results = {"careers": {"results": rows, "headers": getHeaders("careers")}}
+	return render_template("result.html", **locals())
+
 @app.route('/careers/<int:id>')
 def get_career(id):
 	
@@ -239,7 +273,7 @@ def get_career(id):
 	cur = con.cursor()
 	
 	columnNames = ["ID", "Name", "Salary", "Growth", "Employment"]
-	limitMajors = 6
+	limitMajors = 25
 	
 	cur.execute("select * from careers where careerID = " + str(id))
 	careers = cur.fetchall()
@@ -500,9 +534,6 @@ def set_majorcareer():
 	else:
 		print(errorMsg)
 		
-@app.errorhandler(404)
-def page_not_found(error):
-    return render_template('page_not_found.html'), 404
 
 ##################################################################################
 #Vetted Code Up Till This Point
@@ -574,15 +605,7 @@ if __name__ == "__main__":
     app.run()
 
 # careers
-@app.route("/")
-def view_all_careers():
-	
-	con = lite.connect("info257app.db")
-	cur = con.cursor()
-	cur.execute("select name, salary, growth, employment from careers")
-	rows = cur.fetchall()
 
-	return render_template("index.html", **locals())
 
 @app.route("/addcareers", methods=["GET", "POST"])
 def add_careers():
@@ -701,15 +724,6 @@ def get_majorcareers(id):
                                     
 # majors
 
-@app.route("/")
-def view_all_majors():
-	
-	con = lite.connect("info257app.db")
-	cur = con.cursor()
-	cur.execute("select name, description, average_salary, expected_growth, no_of_students, no_of_offering_schools from majors")
-	rows = cur.fetchall()
-
-	return render_template("index.html", **locals())
 
 @app.route("/addmajorcareers", methods=["GET", "POST"])
 def add_majors():
@@ -745,15 +759,6 @@ def get_majors(id):
 
 # universities
 
-@app.route("/")
-def view_all_universities():
-	
-	con = lite.connect("universities.db")
-	cur = con.cursor()
-	cur.execute("select name, ug_admissions_rate, size, in_state_tuition, out_state_tuition, state, city from universities")
-	rows = cur.fetchall()
-
-	return render_template("index.html", **locals())
 
 @app.route("/adduniversities", methods=["GET", "POST"])
 def add_universities():
@@ -826,4 +831,8 @@ def get_universitymajors(id):
 	cur.execute("select id university, major from universitymajors where id = " + str(id))
 	rows = cur.fetchall()
 
-	return render_template("viewuniversitymajors.html", **locals())                                   
+	return render_template("viewuniversitymajors.html", **locals()) 
+
+@app.errorhandler(404)
+def page_not_found(error):
+    return render_template('page_not_found.html'), 404                                  

@@ -19,8 +19,9 @@ $(document).ready(function() {
    		});
    		var id = $(this).attr("id");
    		window.setTimeout(function() {
+   			$(".form#" + id).addClass("active");
    			$(".forms").css("display", "block").fadeTo(400, 1, function() {
-   				$(".form#" + id).addClass("active");
+   				console.log("coming alive!");
    			});
    		}, 300);
    	});

@@ -46,6 +46,9 @@ table {
     table-layout : fixed;
     width: 100% !important;
 }
+.wide {
+	width: 300px;
+}
 #navbar {
 	background: #48BCA5;
 	height: 70px;
@@ -331,4 +334,27 @@ table {
 }
 .results#content {
 	width: 80% !important;
+}
+.nav-buttons {
+	position: absolute;
+	right: 300px;
+}
+.nav-item {
+	color: white;
+	transition: 0.3s;
+	line-height: 70px;
+	position: relative;
+	margin-left: 5px;
+	margin-right: 5px;
+	font-size: 12px;
+	text-transform: uppercase;
+}
+.nav-item:hover {
+	color: black;
+}
+#home-image {
+	position: relative;
+	width: 400px;
+	display: block;
+	margin: 0 auto;
 }
