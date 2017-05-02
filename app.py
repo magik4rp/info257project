@@ -67,13 +67,13 @@ resultsDict = []
 
 def getHeaders(table):
 	if table == "majors":
-		return ["ID", "Name", "Average Salary", "Expected Growth", "Number of Students", "Number of Offering Universities"]
+		return ["ID", "Name", "Average Salary", "Expected Growth", "No. of Students", "No. Offering Universities"]
 	elif table == "cities":
 		return ["ID", "State", "City", "Summer Temperature", "Winter Temperature"]
 	elif table == "universities":
 		return ["ID", "Name", "Admissions Rate", "Size", "In-State Tuition", "Out-State Tuition"]
 	elif table == "careers":
-		return ["ID", "Name", "Salary", "Growth", "Employment"]
+		return ["ID", "Name", "Salary", "Growth", "No. Employed"]
 
 def getQuery(myDict):
 	myDict = myDict.to_dict()
@@ -81,6 +81,8 @@ def getQuery(myDict):
 	query = "select * from " + category + " c"
 	if category == "majors":
 		query = "select majorID, name, average_salary, expected_growth, no_of_students, no_of_offering_schools from majors c"
+	elif category == "universities":
+		query = "select universityID, name, ug_admissions_rate, size, in_state_tuition, out_state_tuition from universities c"
 	conjunction_count = 0
 	seen = False 
 	instate = False
