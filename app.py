@@ -69,13 +69,14 @@ def getHeaders(table):
 	if table == "majors":
 		return ["ID", "Name", "Average Salary", "Expected Growth", "No. of Students", "No. Offering Universities"]
 	elif table == "cities":
-		return ["ID", "State", "City", "Summer Temperature", "Winter Temperature"]
+		return ["ID", "City", "State", "Summer Temperature", "Winter Temperature"]
 	elif table == "universities":
 		return ["ID", "Name", "Admissions Rate", "Size", "In-State Tuition", "Out-State Tuition"]
 	elif table == "careers":
 		return ["ID", "Name", "Salary", "Growth", "No. Employed"]
 
 def getQuery(myDict):
+	# print("\n!!!!!!! MYDICT: " + str(myDict) + " \n")
 	myDict = myDict.to_dict()
 	category = myDict.pop("category")
 	query = "select * from " + category + " c"
@@ -83,16 +84,24 @@ def getQuery(myDict):
 		query = "select majorID, name, average_salary, expected_growth, no_of_students, no_of_offering_schools from majors c"
 	elif category == "universities":
 		query = "select universityID, name, ug_admissions_rate, size, in_state_tuition, out_state_tuition from universities c"
+	elif category == "cities":
+		query = "select cityID, city, state, summer_temperature, winter_temperature from cities c"
 	conjunction_count = 0
 	seen = False 
 	instate = False
 	tuition = "100000"
+	state = ""
+	if "state" in myDict:
+		state = myDict.pop("state")
+	if state != "" and state != "Any":
+		conjunction_count += 1
+		query += " INNER JOIN cities ci on ci.cityID = c.cityID WHERE ci.state = '" + state + "'"
 	for term in myDict.items():
 		key = term[0]
 		value = term[1]
 		#process key here (sorry its so messy)
 		if value != "":
-			conjunction = "AND"
+			conjunction = " AND"
 			if conjunction_count == 0:
 				conjunction = " WHERE"
 			conjunction_count += 1
@@ -148,9 +157,12 @@ def search():
 	con = lite.connect("info257app.db")
 	cur = con.cursor()
 	cur.execute(query)
-	results = {values['category']: {"results": cur.fetchall(), "headers": headers}}
-
-	print(results)
+	result = sorted(cur.fetchall(), key=lambda row: row[1]) 
+	results = {values['category']: {"results": result, "headers": headers}}
+	if len(result) == 0:
+		results = {}
+	print("!!!! result: " + str(result))
+	print("!!!! results: " + str(results))
 	return render_template("result.html", **locals())
 
 @app.route('/mini-search', methods=['POST'])
@@ -162,7 +174,7 @@ def minisearch():
 	value = values['keyword']
 	for table in ["universities", "careers", "majors", "cities"]:
 		if table =="cities":
-			cur.execute("select * from " + table + " c where  c.city like '%" + value + "%'")
+			cur.execute("select cityID, city, state, summer_temperature, winter_temperature from cities where city like  '%" + value + "%'")
 		elif table == "universities":
 			cur.execute("select universityID, name, ug_admissions_rate, size, in_state_tuition, out_state_tuition from universities where name like '%" + value + "%'")
 		elif table =="majors":
@@ -170,14 +182,70 @@ def minisearch():
 		else:
 			cur.execute("select * from " + table + " c where  c.name like '%" + value + "%'")
 		print(results)
-		result = cur.fetchall()
+		result = sorted(cur.fetchall(), key=lambda row: row[1]) 
 		if result != []:
 			results[table] = {"results": result, "headers": getHeaders(table)}
+	print("HERE IS RESULTS!!!!!! " + str(results))
 	return render_template("result.html", **locals())
 
 @app.route('/')
 def home():
-	return render_template("home.html")
+	states = ["Any", "Alaska",
+                  "Alabama",
+                  "Arkansas",
+                  "American Samoa",
+                  "Arizona",
+                  "California",
+                  "Colorado",
+                  "Connecticut",
+                  "District of Columbia",
+                  "Delaware",
+                  "Florida",
+                  "Georgia",
+                  "Guam",
+                  "Hawaii",
+                  "Iowa",
+                  "Idaho",
+                  "Illinois",
+                  "Indiana",
+                  "Kansas",
+                  "Kentucky",
+                  "Louisiana",
+                  "Massachusetts",
+                  "Maryland",
+                  "Maine",
+                  "Michigan",
+                  "Minnesota",
+                  "Missouri",
+                  "Mississippi",
+                  "Montana",
+                  "North Carolina",
+                  " North Dakota",
+                  "Nebraska",
+                  "New Hampshire",
+                  "New Jersey",
+                  "New Mexico",
+                  "Nevada",
+                  "New York",
+                  "Ohio",
+                  "Oklahoma",
+                  "Oregon",
+                  "Pennsylvania",
+                  "Puerto Rico",
+                  "Rhode Island",
+                  "South Carolina",
+                  "South Dakota",
+                  "Tennessee",
+                  "Texas",
+                  "Utah",
+                  "Virginia",
+                  "Virgin Islands",
+                  "Vermont",
+                  "Washington",
+                  "Wisconsin",
+                  "West Virginia",
+                  "Wyoming"]
+	return render_template("home.html", **locals())
 
 @app.route("/majors")
 def view_all_majors():
@@ -216,7 +284,7 @@ def get_city(id):
 	con = lite.connect("info257app.db")
 	cur = con.cursor()
 	
-	columnNames = ["ID", "State", "City", "Summer Temperature", "Winter Temperature"]
+	columnNames = getHeaders("cities")
 	limitUniversities = 10
 	
 	cur.execute("select * from cities where cityID = " + str(id))
@@ -245,7 +313,7 @@ def get_university(id):
 	
 	columnNames = ["ID", "Name", "UG Admissions Rate", "Size", "In-State Tuition", "Out-State Tuition"]
 	columnNames_info = ["State", "City"]
-	limitMajors = 10
+	limitMajors = 100
 	
 	cur.execute("select universityID, name, ug_admissions_rate, size, in_state_tuition, out_state_tuition from universities where universityID = " + str(id))
 	universities = cur.fetchall()
@@ -253,7 +321,7 @@ def get_university(id):
 	cur.execute("select state, city from universities, cities where universities.universityID = " + str(id) + " and cities.cityID = universities.cityID")
 	universities_info = cur.fetchall()
 	
-	cur.execute("select majors.name, majors.majorID from majors, universitymajors where universitymajors.universityID = " + str(id) + " and universitymajors.majorID = majors.majorID limit " + str(limitMajors))
+	cur.execute("select majors.name, majors.majorID from majors, universitymajors where universitymajors.universityID = " + str(id) + " and universitymajors.majorID = majors.majorID")
 	majors = cur.fetchall()
 	
 	return render_template("university.html", **locals())
@@ -638,7 +706,7 @@ def view_all_cities():
 
 	con = lite.connect("cities.db")
 	cur = con.cursor()
-	cur.execute("select state, city, summer_temperature, winter_temperature")
+	cur.execute("select cit, state, summer_temperature, winter_temperature")
 	rows = cur.fetchall()
 
 	return render_template("index.html", **locals())

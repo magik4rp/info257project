@@ -113,6 +113,12 @@ $(document).ready(function() {
    			data.majors.size.max = 100000;
    		}
    	});
+   	$("select#state").change(function() {
+   		var id = $(this).val();
+   		console.log("You clicked the option with id " + id);
+   		$("input#state").val($(this).val());
+   		console.log("The state input value is now " + $("input#state").val());
+   	});
    	$(function() {
 	    $( "#careers-salary" ).slider({
 	      range: true,

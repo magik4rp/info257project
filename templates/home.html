@@ -67,6 +67,17 @@ Table Name: careers
                 <h1>Universities</h1>
                 <input type="radio" value="universities" name="category" checked>
                 <input type="text" id="keyword" name="keyword" placeholder="Search by keyword...">
+                <div class="form-row" id="state">
+                  <b>State: </b>
+                  <input id="state" name="state" style="display: none;">
+                  <div id="styled-select">
+                    <select id="state">
+                      {% for state in states %}
+                        <option value="{{ state }}">{{ state }}</option>
+                      {% endfor %}
+                    </select>
+                  </div>
+                </div>
                 <div class="form-row" id="instate">
                   <b>Are you: </b>
                   {% for count in [("true", "In-State"), ("false", "Out-of-State")] %}
@@ -157,7 +168,7 @@ Table Name: careers
     	</div>
     </div>
     <div id="footer">
-      &copy; Copyright 2017 by <a href="http://domain.invalid/">you</a>.
+      &copy; Copyright 2017 by <a href="http://domain.invalid/">GladCap</a>.
     </div>
   </body>
 </html>

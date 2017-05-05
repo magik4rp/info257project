@@ -24,10 +24,11 @@
       </form>
     </div>
     <div id="content">{% block content %}{% endblock %}</div>
-    <div id="footer">
-      {% block footer %}
-      &copy; Copyright 2017 by <a href="http://domain.invalid/">you</a>.
-      {% endblock %}
-    </div>
+    <div id="scrolltop">↑<br>TOP</div>
+    <script>
+      $("#scrolltop").click(function() {
+         $('html,body').animate({ scrollTop: 0 }, 'fast');
+      });
+    </script>
   </body>
 </html>

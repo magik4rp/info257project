@@ -23,37 +23,44 @@
         <input type="submit" style="display: none">
       </form>
     </div>
-    <div class="results" id="content">
-    	{% for key, value in results.items() %}
-		<h2 class="table-title"> {{ key }} </h2>
-		<table>	
-			<tr>
-				<th class="wide">{{ value["headers"][1] }}</th>
-				{% for header in value["headers"][2:]%}
-					<th>{{ header }}</th>
-				{% endfor %}
-			</tr>
-			{% for row in value["results"] %}
-			
-			<tr>
-				<td class="wide">
-					<a href="/{{ key }}/{{ row[0] }}">
-						{{ row[1] }}
-					</a>
-				</td>
-				{% for column in row[2:] %}
-					<td> {{ column }} </td>
-				{% endfor %}
-			</tr>
-			
-		    {% endfor %}
-		</table>
-		{% endfor %}
-   	 </div>
-    <div id="footer">
-      {% block footer %}
-      &copy; Copyright 2017 by <a href="http://domain.invalid/">you</a>.
-      {% endblock %}
-    </div>
+    
+    	{% if results|length == 0 %}
+    		<img id="ohno" src="{{ url_for('static', filename='images/ohno.png') }}">
+    	{% else %}
+    		<div class="results" id="content">
+    		{% for key, value in results.items() %}
+			<h2 class="table-title"> {{ key }} </h2>
+			<table>	
+				<tr>
+					<th class="wide">{{ value["headers"][1] }}</th>
+					{% for header in value["headers"][2:]%}
+						<th>{{ header }}</th>
+					{% endfor %}
+				</tr>
+				{% for row in value["results"] %}
+				
+				<tr>
+					<td class="wide">
+						<a href="/{{ key }}/{{ row[0] }}">
+							{{ row[1] }}
+						</a>
+					</td>
+					{% for column in row[2:] %}
+						<td> {{ column }} </td>
+					{% endfor %}
+				</tr>
+				
+			    {% endfor %}
+			</table>
+			{% endfor %}
+			</div>
+		{% endif %}
+   	 
+    <div id="scrolltop">↑<br>TOP</div>
+    <script>
+      $("#scrolltop").click(function() {
+         $('html,body').animate({ scrollTop: 0 }, 'fast');
+      });
+    </script>
   </body>
 </html>
